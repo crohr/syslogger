@@ -25,7 +25,8 @@ Gem::Specification.new do |s|
      "VERSION",
      "lib/syslogger.rb",
      "spec/spec_helper.rb",
-     "spec/syslogger_spec.rb"
+     "spec/syslogger_spec.rb",
+     "syslogger.gemspec"
   ]
   s.homepage = %q{http://github.com/crohr/syslogger}
   s.rdoc_options = ["--charset=UTF-8"]
