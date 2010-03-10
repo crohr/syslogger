@@ -12,13 +12,23 @@ class Syslogger
     Logger::FATAL => Syslog::LOG_ERR,
     Logger::UNKNOWN => Syslog::LOG_ALERT
   }
+  
   # 
   # Initializes default options for the logger
-  # <tt>ident</tt>:: the name of your program [default=$0]
-  # <tt>options</tt>:: Syslog options [default=Syslog::LOG_PID | Syslog::LOG_CONS]
-  # <tt>facility</tt>:: the syslog facility [default=nil]
-  #
-  #                     correct values are Syslog::LOG_DAEMON, Syslog::LOG_USER, Syslog::LOG_SYSLOG, Syslog::LOG_LOCAL2, Syslog::LOG_NEWS, etc.
+  # <tt>ident</tt>:: the name of your program [default=$0].
+  # <tt>options</tt>::  syslog options [default=<tt>Syslog::LOG_PID | Syslog::LOG_CONS</tt>].    
+  #                     Correct values are:   
+  #                       LOG_CONS    : writes the message on the console if an error occurs when sending the message;  
+  #                       LOG_NDELAY  : no delay before sending the message;  
+  #                       LOG_PERROR  : messages will also be written on STDERR;  
+  #                       LOG_PID     : adds the process number to the message (just after the program name)
+  # <tt>facility</tt>:: the syslog facility [default=nil] Correct values include:
+  #                       Syslog::LOG_DAEMON
+  #                       Syslog::LOG_USER
+  #                       Syslog::LOG_SYSLOG
+  #                       Syslog::LOG_LOCAL2
+  #                       Syslog::LOG_NEWS
+  #                       etc.
   # 
   # Usage:
   #   logger = Syslogger.new("my_app", Syslog::LOG_PID | Syslog::LOG_CONS, Syslog::LOG_LOCAL0)
@@ -39,19 +49,27 @@ class Syslogger
     end
   end
   
+  # Logs a message at the Logger::INFO level.
   def <<(msg)
     add(Logger::INFO, msg)
   end
   
+  # Low level method to add a message.
+  # +severity+::  the level of the message. One of Logger::DEBUG, Logger::INFO, Logger::WARN, Logger::ERROR, Logger::FATAL, Logger::UNKNOWN
+  # +message+:: the message string. If nil, the method will call the block and use the result as the message string.
+  # +progname+:: optionally, a overwrite the program name that appears in the log message.
   def add(severity, message = nil, progname = nil, &block)
     progname ||= @ident
     Syslog.open(progname, @options, @facility) { |s| 
       s.mask = Syslog::LOG_UPTO(MAPPING[@level])
-      s.log(MAPPING[severity], (message || block.call)) 
+      s.log(MAPPING[severity], (message || block.call).to_s) 
     }
   end
   
-  def level=(logger_level)
-    @level = logger_level
+  # Sets the minimum level for messages to be written in the log.
+  # +level+:: one of <tt>Logger::DEBUG</tt>, <tt>Logger::INFO</tt>, <tt>Logger::WARN</tt>, <tt>Logger::ERROR</tt>, <tt>Logger::FATAL</tt>, <tt>Logger::UNKNOWN</tt>
+  def level=(level)
+    @level = level
   end
+  
 end

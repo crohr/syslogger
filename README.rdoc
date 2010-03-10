@@ -1,16 +1,23 @@
 = syslogger
 
-Description goes here.
+A drop-in replacement for the standard Logger Ruby library, that logs to the syslog instead of a log file.
+Contrary to the SyslogLogger library, you can specify the facility and the syslog options.
 
-== Note on Patches/Pull Requests
- 
-* Fork the project.
-* Make your feature addition or bug fix.
-* Add tests for it. This is important so I don't break it in a
-  future version unintentionally.
-* Commit, do not mess with rakefile, version, or history.
-  (if you want to have your own version, that is fine but bump version in a commit by itself I can ignore when I pull)
-* Send me a pull request. Bonus points for topic branches.
+== Installation
+  gem install syslogger
+
+== Usage
+  require 'syslogger'
+  
+  # Will send all messages to the local0 facility, adding the process id in the message
+  logger = Syslogger.new("app_name", Syslog::LOG_PID, Syslog::LOG_LOCAL0)
+  
+  # Send messages that are at least of the Logger::INFO level
+  logger.level = Logger::INFO # use Logger levels
+  
+  logger.debug "will not appear"
+  logger.info "will appear"
+  logger.warn "will appear"
 
 == Copyright
 
