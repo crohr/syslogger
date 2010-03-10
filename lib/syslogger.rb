@@ -35,11 +35,20 @@ class Syslogger
   
   %w{debug info warn error fatal unknown}.each do |logger_method|
     define_method logger_method.to_sym do |message|
-      Syslog.open(@ident, @options, @facility) { |s| 
-        s.mask = Syslog::LOG_UPTO(MAPPING[@level])
-        s.log(MAPPING[Logger.const_get(logger_method.upcase)], message) 
-      }
+      add(Logger.const_get(logger_method.upcase), message)
     end
+  end
+  
+  def <<(msg)
+    add(Logger::INFO, msg)
+  end
+  
+  def add(severity, message = nil, progname = nil, &block)
+    progname ||= @ident
+    Syslog.open(progname, @options, @facility) { |s| 
+      s.mask = Syslog::LOG_UPTO(MAPPING[@level])
+      s.log(MAPPING[severity], (message || block.call)) 
+    }
   end
   
   def level=(logger_level)
