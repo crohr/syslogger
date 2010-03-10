@@ -21,4 +21,4 @@ Contrary to the SyslogLogger library, you can specify the facility and the syslo
 
 == Copyright
 
-Copyright (c) 2010 Cyril. See LICENSE for details.
+Copyright (c) 2010 Cyril, INRIA Rennes-Bretagne Atlantique. See LICENSE for details.
