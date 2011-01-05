@@ -47,6 +47,10 @@ class Syslogger
     define_method logger_method.to_sym do |message|
       add(Logger.const_get(logger_method.upcase), message)
     end
+    
+    unless logger_method == 'unknown'
+      define_method "#{logger_method}?".to_sym do; @level <= Logger.const_get(logger_method.upcase); end
+    end
   end
   
   # Logs a message at the Logger::INFO level.
