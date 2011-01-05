@@ -51,9 +51,9 @@ describe "Syslogger" do
       syslog.should_receive(:log).with(Syslog::LOG_INFO, "message")
       @logger.add(Logger::INFO, "message", "progname") { "my message" }
     end
-  end
+  end # describe "add"
   
-  describe "level?() methods" do
+  describe ":level? methods" do
     before(:each) do
       @logger = Syslogger.new("my_app", Syslog::LOG_PID, Syslog::LOG_USER)
     end
@@ -110,8 +110,6 @@ describe "Syslogger" do
         @logger.send("#{logger_method}?").should be_false
       end
     end
-    
-  end
-  
-  # TODO: test logger level
-end
+  end # describe ":level? methods"
+
+end # describe "Syslogger"

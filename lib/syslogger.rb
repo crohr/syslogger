@@ -52,7 +52,9 @@ class Syslogger
     end
     
     unless logger_method == 'unknown'
-      define_method "#{logger_method}?".to_sym do; @level <= Logger.const_get(logger_method.upcase); end
+      define_method "#{logger_method}?".to_sym do
+        @level <= Logger.const_get(logger_method.upcase)
+      end
     end
   end
   
