@@ -2,8 +2,11 @@ require 'syslog'
 require 'logger'
 
 class Syslogger
+  
+  VERSION = "1.2.0"
+  
   attr_reader :level, :ident, :options, :facility
-
+  
   MAPPING = {
     Logger::DEBUG => Syslog::LOG_DEBUG,
     Logger::INFO => Syslog::LOG_INFO,
