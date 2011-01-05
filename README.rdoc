@@ -4,7 +4,7 @@ A drop-in replacement for the standard Logger Ruby library, that logs to the sys
 Contrary to the SyslogLogger library, you can specify the facility and the syslog options.
 
 == Installation
-  gem install syslogger
+  $ gem install syslogger
 
 == Usage
   require 'syslogger'
@@ -35,6 +35,9 @@ Contrary to the SyslogLogger library, you can specify the facility and the syslo
 * Package (do not forget to increment <tt>Syslogger:VERSION</tt>):
 
     $ gem build syslogger.gemspec
+
+== Contributions
+* crhym3
 
 == Copyright
 
