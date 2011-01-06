@@ -72,7 +72,7 @@ class Syslogger
     Syslog.open(progname, @options, @facility) { |s| 
       s.mask = Syslog::LOG_UPTO(MAPPING[@level])
       # substitute '%' for '%%' before logging
-      # so that syslog won't complain abut malformed characters
+      # so that syslog won't complain about malformed characters
       s.log(MAPPING[severity], (message || block.call).to_s.gsub(/%/, '%%'))
     }
   end
