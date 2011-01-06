@@ -71,7 +71,9 @@ class Syslogger
     progname ||= @ident
     Syslog.open(progname, @options, @facility) { |s| 
       s.mask = Syslog::LOG_UPTO(MAPPING[@level])
-      s.log(MAPPING[severity], (message || block.call).to_s) 
+      # substitute '%' for '%%' before logging
+      # so that syslog won't complain abut malformed characters
+      s.log(MAPPING[severity], (message || block.call).to_s.gsub(/%/, '%%'))
     }
   end
   
