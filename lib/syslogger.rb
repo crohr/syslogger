@@ -3,7 +3,7 @@ require 'logger'
 
 class Syslogger
   
-  VERSION = "1.2.1"
+  VERSION = "1.2.2"
   
   attr_reader :level, :ident, :options, :facility
   
