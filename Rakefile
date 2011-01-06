@@ -15,6 +15,7 @@ Spec::Rake::SpecTask.new(:rcov) do |spec|
 end
 
 Rake::RDocTask.new do |rdoc|
+  require 'syslogger'
   rdoc.rdoc_dir = 'rdoc'
   rdoc.title = "syslogger #{Syslogger::VERSION}"
   rdoc.rdoc_files.include('README*')
