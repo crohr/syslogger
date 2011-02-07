@@ -19,6 +19,8 @@ Contrary to the SyslogLogger library, you can specify the facility and the syslo
   logger.info "will appear"
   logger.warn "will appear"
 
+Documentation available at <http://rdoc.info/github/crohr/syslogger/master/file/README.rdoc>.
+
 == Development
 * Install +bundler+:
 
