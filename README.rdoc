@@ -38,6 +38,7 @@ Contrary to the SyslogLogger library, you can specify the facility and the syslo
 
 == Contributions
 * crhym3
+* theflow
 
 == Copyright
 
