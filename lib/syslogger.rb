@@ -71,9 +71,7 @@ class Syslogger
     progname ||= @ident
     Syslog.open(progname, @options, @facility) { |s| 
       s.mask = Syslog::LOG_UPTO(MAPPING[@level])
-      # substitute '%' for '%%' before logging
-      # so that syslog won't complain about malformed characters
-      s.log(MAPPING[severity], (message || block.call).to_s.gsub(/%/, '%%'))
+      s.log(MAPPING[severity], clean(message || block.call))
     }
   end
   
@@ -82,5 +80,13 @@ class Syslogger
   def level=(level)
     @level = level
   end
-  
+
+private
+
+  def clean(message)
+    message = message.to_s.dup
+    message.strip!
+    message.gsub!(/%/, '%%') # syslog(3) freaks on % (printf)
+    message
+  end
 end
