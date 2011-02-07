@@ -65,10 +65,11 @@ class Syslogger
   
   # Low level method to add a message.
   # +severity+::  the level of the message. One of Logger::DEBUG, Logger::INFO, Logger::WARN, Logger::ERROR, Logger::FATAL, Logger::UNKNOWN
-  # +message+:: the message string. If nil, the method will call the block and use the result as the message string.
+  # +message+:: the message string. If nil, the method will call the block and use the result as the message string. If both are nil will use the progname as per the behaviour of both the standard Ruby logger, and the Rails BufferedLogger.
   # +progname+:: optionally, a overwrite the program name that appears in the log message.
   def add(severity, message = nil, progname = nil, &block)
     progname ||= @ident
+    message = (message || (block && block.call) || progname).to_s
     Syslog.open(progname, @options, @facility) { |s| 
       s.mask = Syslog::LOG_UPTO(MAPPING[@level])
       # substitute '%' for '%%' before logging
