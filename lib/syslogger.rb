@@ -69,12 +69,12 @@ class Syslogger
   # +progname+:: optionally, a overwrite the program name that appears in the log message.
   def add(severity, message = nil, progname = nil, &block)
     progname ||= @ident
-    message = (message || (block && block.call) || progname).to_s
+    message = (message || (block && block.call) || progname).to_s.gsub(/%/, '%%')
     Syslog.open(progname, @options, @facility) { |s| 
       s.mask = Syslog::LOG_UPTO(MAPPING[@level])
       # substitute '%' for '%%' before logging
       # so that syslog won't complain about malformed characters
-      s.log(MAPPING[severity], (message || block.call).to_s.gsub(/%/, '%%'))
+      s.log(MAPPING[severity], message)
     }
   end
   
