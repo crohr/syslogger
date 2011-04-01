@@ -3,6 +3,8 @@
 A drop-in replacement for the standard Logger Ruby library, that logs to the syslog instead of a log file.
 Contrary to the SyslogLogger library, you can specify the facility and the syslog options.
 
+This fork takes care of log messages spanning across multiple lines. Like in a Rails backtrace.
+
 == Installation
   $ gem install syslogger
 
