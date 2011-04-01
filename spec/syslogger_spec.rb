@@ -51,13 +51,7 @@ describe "Syslogger" do
       syslog.should_receive(:log).with(Syslog::LOG_INFO, "message")
       @logger.add(Logger::INFO, "message", "progname") { "my message" }
     end
-
-    it "should substitute '%' for '%%' before adding the :message" do
-      Syslog.stub(:open).and_yield(syslog=mock("syslog", :mask= => true))
-      syslog.should_receive(:log).with(Syslog::LOG_INFO, "%%me%%ssage%%")
-      @logger.add(Logger::INFO, "%me%ssage%")
-    end
-
+    
     it "should strip the :message" do
       Syslog.stub(:open).and_yield(syslog=mock("syslog", :mask= => true))
       syslog.should_receive(:log).with(Syslog::LOG_INFO, "message")
@@ -80,6 +74,14 @@ describe "Syslogger" do
         and_yield(syslog=mock("syslog", :mask= => true))
       syslog.should_receive(:log).with(Syslog::LOG_INFO, "my_app")
       @logger.add(Logger::INFO, nil)
+    end
+
+    context "cleaning" do
+      it "should substitute '%' for '%%' before adding the :message" do
+        Syslog.stub(:open).and_yield(syslog=mock("syslog", :mask= => true))
+        syslog.should_receive(:log).with(Syslog::LOG_INFO, "%%me%%ssage%%")
+        @logger.add(Logger::INFO, "%me%ssage%")
+      end
     end
   end # describe "add"
 
