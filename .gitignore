@@ -9,6 +9,7 @@ tmtags
 *~
 \#*
 .\#*
+TAGS
 
 ## VIM
 *.swp
@@ -17,5 +18,8 @@ tmtags
 coverage
 rdoc
 pkg
+
+## Bundler
+.bundle
 
 ## PROJECT::SPECIFIC
