@@ -90,10 +90,7 @@ class Syslogger
 
   # Borrowed from SyslogLogger.
   def clean(message)
-    message = message.to_s.dup
-    message.strip!
-    message.gsub!(/%/, '%%') # syslog(3) freaks on % (printf)
-    message.gsub!(/\e\[[^m]*m/, '') # remove useless ansi color codes
-    message
+    message.each_line.collect{|line| line.strip}
+      .join(' >> ').gsub(/%/, '%%').gsub(/\e\[[^m]*m/, '')
   end
 end
