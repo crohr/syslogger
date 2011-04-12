@@ -90,7 +90,7 @@ class Syslogger
 
   # Borrowed from SyslogLogger.
   def clean(message)
-    message.each_line.collect{|line| line.strip}
+    message.each_line.map(&:strip)
       .join(' >> ').gsub(/%/, '%%').gsub(/\e\[[^m]*m/, '')
   end
 end

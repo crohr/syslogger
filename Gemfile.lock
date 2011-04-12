@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    syslogger (1.2.4)
+    syslogger (1.2.5)
 
 GEM
   remote: http://rubygems.org/
