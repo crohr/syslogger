@@ -95,6 +95,12 @@ describe "Syslogger" do
         syslog.should_receive(:log).with(Syslog::LOG_INFO, "A FooException has been raised >> And here >> is your >> really long >> backtrace...")
         @logger.add(Logger::INFO, backtrace)
       end
+
+      it "should stringify if an Exception is received" do
+        Syslog.stub(:open).and_yield(syslog=mock("syslog", :mask= => true))
+        syslog.should_receive(:log).with(Syslog::LOG_INFO, "Invalidity!")
+        @logger.add(Logger::INFO, Exception.new("Invalidity!"))
+      end
     end
   end # describe "add"
 

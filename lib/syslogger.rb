@@ -3,7 +3,7 @@ require 'logger'
 
 class Syslogger
 
-  VERSION = "1.2.5"
+  VERSION = "1.2.6"
 
   attr_reader :level, :ident, :options, :facility
 
@@ -90,7 +90,7 @@ class Syslogger
 
   # Borrowed from SyslogLogger.
   def clean(message)
-    message.each_line.map(&:strip)
+    message.to_s.each_line.map(&:strip)
       .join(' >> ').gsub(/%/, '%%').gsub(/\e\[[^m]*m/, '')
   end
 end
