@@ -47,7 +47,10 @@ class Syslogger
   end
 
   %w{debug info warn error fatal unknown}.each do |logger_method|
-    define_method logger_method.to_sym do |message|
+    # Accepting *args as message could be nil.
+    #  Default params not supported in ruby 1.8.7
+    define_method logger_method.to_sym do |*args, &block|
+      message = args.first || block && block.call
       add(Logger.const_get(logger_method.upcase), message)
     end
 
