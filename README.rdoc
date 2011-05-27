@@ -42,6 +42,7 @@ Documentation available at <http://rdoc.info/github/crohr/syslogger/master/file/
 * crhym3
 * theflow
 * smulube
+* levent
 
 == Copyright
 
