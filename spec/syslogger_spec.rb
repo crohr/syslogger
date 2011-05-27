@@ -19,6 +19,20 @@ describe "Syslogger" do
     it "should respond to the #{logger_method.inspect} method" do
       Syslogger.new.should respond_to logger_method.to_sym
     end
+
+    it "should log #{logger_method} without raising an exception if called with a nil message" do
+      logger = Syslogger.new
+      lambda {
+        logger.send(logger_method.to_sym, nil)
+      }.should_not raise_error
+    end
+
+    it "should log #{logger_method} without raising an exception if called with a no message" do
+      logger = Syslogger.new
+      lambda {
+        logger.send(logger_method.to_sym)
+      }.should_not raise_error
+    end
   end
 
   it "should respond to <<" do
