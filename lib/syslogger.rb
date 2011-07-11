@@ -50,6 +50,7 @@ class Syslogger
     # Accepting *args as message could be nil.
     #  Default params not supported in ruby 1.8.7
     define_method logger_method.to_sym do |*args, &block|
+      return true if @level > Logger.const_get(logger_method.upcase)
       message = args.first || block && block.call
       add(Logger.const_get(logger_method.upcase), message)
     end
@@ -59,6 +60,11 @@ class Syslogger
         @level <= Logger.const_get(logger_method.upcase)
       end
     end
+  end
+
+  # Log a message at the Logger::INFO level. Useful for use with Rack::CommonLogger
+  def write(msg)
+    add(Logger::INFO, msg)
   end
 
   # Logs a message at the Logger::INFO level.
