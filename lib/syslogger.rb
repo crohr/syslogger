@@ -1,5 +1,6 @@
 require 'syslog'
 require 'logger'
+require 'thread'
 
 class Syslogger
 
@@ -44,6 +45,7 @@ class Syslogger
     @options = options || (Syslog::LOG_PID | Syslog::LOG_CONS)
     @facility = facility
     @level = Logger::INFO
+    @mutex = Mutex.new
   end
 
   %w{debug info warn error fatal unknown}.each do |logger_method|
@@ -74,13 +76,15 @@ class Syslogger
   # +progname+:: optionally, overwrite the program name that appears in the log message.
   def add(severity, message = nil, progname = nil, &block)
     progname ||= @ident
-    Syslog.open(progname, @options, @facility) { |s|
-      s.mask = Syslog::LOG_UPTO(MAPPING[@level])
-      s.log(
-        MAPPING[severity], 
-        clean(message || (block && block.call) || progname)
-      )
-    }
+    @mutex.synchronize do
+      Syslog.open(progname, @options, @facility) do |s|
+        s.mask = Syslog::LOG_UPTO(MAPPING[@level])
+        s.log(
+          MAPPING[severity], 
+          clean(message || (block && block.call) || progname)
+        )
+      end
+    end
   end
 
   # Sets the minimum level for messages to be written in the log.
