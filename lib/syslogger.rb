@@ -11,9 +11,9 @@ class Syslogger
   MAPPING = {
     Logger::DEBUG => Syslog::LOG_DEBUG,
     Logger::INFO => Syslog::LOG_INFO,
-    Logger::WARN => Syslog::LOG_NOTICE,
-    Logger::ERROR => Syslog::LOG_WARNING,
-    Logger::FATAL => Syslog::LOG_ERR,
+    Logger::WARN => Syslog::LOG_WARNING,
+    Logger::ERROR => Syslog::LOG_ERR,
+    Logger::FATAL => Syslog::LOG_CRIT,
     Logger::UNKNOWN => Syslog::LOG_ALERT
   }
 
