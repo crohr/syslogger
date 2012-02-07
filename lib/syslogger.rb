@@ -110,7 +110,8 @@ class Syslogger
   # Borrowed from SyslogLogger.
   def clean(message)
     message = message.to_s.dup
-    message.strip!
+    message.strip! # remove whitespace
+    message.gsub!(/\n/, '\\n') # escape newlines
     message.gsub!(/%/, '%%') # syslog(3) freaks on % (printf)
     message.gsub!(/\e\[[^m]*m/, '') # remove useless ansi color codes
     message
