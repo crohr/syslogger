@@ -86,7 +86,22 @@ class Syslogger
   # Sets the minimum level for messages to be written in the log.
   # +level+:: one of <tt>Logger::DEBUG</tt>, <tt>Logger::INFO</tt>, <tt>Logger::WARN</tt>, <tt>Logger::ERROR</tt>, <tt>Logger::FATAL</tt>, <tt>Logger::UNKNOWN</tt>
   def level=(level)
-    @level = level
+    @level = case level
+             when Logger::DEBUG, Logger::INFO, Logger::WARN, Logger::ERROR, Logger::FATAL, Logger::UNKNOWN
+               level
+             when :debug
+               Logger::DEBUG
+             when :info
+               Logger::INFO
+             when :warn
+               Logger::WARN
+             when :error
+               Logger::ERROR
+             when :fatal
+               Logger::FATAL
+             else
+               raise ArgumentError.new("invalid level `#{level}`")
+             end
   end
 
   protected
