@@ -107,6 +107,47 @@ describe "Syslogger" do
     end
   end # describe "add"
 
+  describe "level=" do
+    before(:each) do
+      @logger = Syslogger.new("my_app", Syslog::LOG_PID, Syslog::LOG_USER)
+    end
+
+    { :debug => Logger::DEBUG,
+      :info  => Logger::INFO,
+      :warn  => Logger::WARN,
+      :error => Logger::ERROR,
+      :fatal => Logger::FATAL
+    }.each_pair do |level_symbol, level_value|
+      it "should allow using :#{level_symbol}" do
+        @logger.level = level_symbol
+        @logger.level.should equal level_value
+      end
+
+      it "should allow using Fixnum #{level_value}" do
+        @logger.level = level_value
+        @logger.level.should equal level_value
+      end
+    end
+
+    it "should not allow using random symbols" do
+      lambda {
+        @logger.level = :foo
+      }.should raise_error
+    end
+
+    it "should not allow using symbols mapping back to non-level constants" do
+      lambda {
+        @logger.level = :version
+      }.should raise_error
+    end
+
+    it "should not allow using strings" do
+      lambda {
+        @logger.level = "warn"
+      }.should raise_error
+    end
+  end # describe "level="
+
   describe ":level? methods" do
     before(:each) do
       @logger = Syslogger.new("my_app", Syslog::LOG_PID, Syslog::LOG_USER)
