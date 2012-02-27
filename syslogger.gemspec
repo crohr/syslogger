@@ -17,7 +17,7 @@ Gem::Specification.new do |s|
   s.description               = "Same as SyslogLogger, but without the ridiculous number of dependencies and with the possibility to specify the syslog facility"
   
   s.add_development_dependency('rake', '~> 0.8')
-  s.add_development_dependency('rspec', '~> 1.3')
+  s.add_development_dependency('rspec', '~> 2.0')
  
   s.files        = Dir.glob("{lib,spec}/**/*") + %w(Rakefile LICENSE README.rdoc)
   
