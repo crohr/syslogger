@@ -1,16 +1,12 @@
-require 'spec/rake/spectask'
-require 'rake/rdoctask'
+require 'rspec/core/rake_task'
+require 'rdoc/task'
 
 $LOAD_PATH.unshift(File.expand_path('../lib', __FILE__))
 
-Spec::Rake::SpecTask.new(:spec) do |spec|
-  spec.libs << 'lib' << 'spec'
-  spec.spec_files = FileList['spec/**/*_spec.rb']
+RSpec::Core::RakeTask.new(:spec) do |spec|
 end
 
-Spec::Rake::SpecTask.new(:rcov) do |spec|
-  spec.libs << 'lib' << 'spec'
-  spec.pattern = 'spec/**/*_spec.rb'
+RSpec::Core::RakeTask.new(:rcov) do |spec|
   spec.rcov = true
 end
 
