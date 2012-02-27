@@ -1,12 +1,15 @@
 = syslogger
 
-A drop-in replacement for the standard Logger Ruby library, that logs to the syslog instead of a log file.
-Contrary to the SyslogLogger library, you can specify the facility and the syslog options.
+A drop-in replacement for the standard Logger Ruby library, that logs to the
+syslog instead of a log file. Contrary to the SyslogLogger library, you can
+specify the facility and the syslog options.
 
 == Installation
+
   $ gem install syslogger
 
 == Usage
+
   require 'syslogger'
   
   # Will send all messages to the local0 facility, adding the process id in the message
@@ -22,6 +25,7 @@ Contrary to the SyslogLogger library, you can specify the facility and the syslo
 Documentation available at <http://rdoc.info/github/crohr/syslogger/master/file/README.rdoc>.
 
 == Development
+
 * Install development dependencies:
 
     $ gem install rake rdoc rspec
@@ -35,10 +39,12 @@ Documentation available at <http://rdoc.info/github/crohr/syslogger/master/file/
     $ gem build syslogger.gemspec
 
 == Contributions
+
 * crhym3
 * theflow
 * smulube
 * levent
+* Flameeyes
 
 == Copyright
 
