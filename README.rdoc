@@ -22,17 +22,13 @@ Contrary to the SyslogLogger library, you can specify the facility and the syslo
 Documentation available at <http://rdoc.info/github/crohr/syslogger/master/file/README.rdoc>.
 
 == Development
-* Install +bundler+:
-
-    $ gem install bundler
-
 * Install development dependencies:
 
-    $ bundle install
+    $ gem install rake rdoc rspec
 
 * Run tests:
 
-    $ bundle exec rake
+    $ rake spec
 
 * Package (do not forget to increment <tt>Syslogger:VERSION</tt>):
 
