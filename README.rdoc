@@ -40,11 +40,7 @@ Documentation available at <http://rdoc.info/github/crohr/syslogger/master/file/
 
 == Contributions
 
-* crhym3
-* theflow
-* smulube
-* levent
-* Flameeyes
+See <https://github.com/crohr/syslogger/contributors>.
 
 == Copyright
 
