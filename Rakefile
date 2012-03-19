@@ -1,3 +1,6 @@
+require 'bundler'
+Bundler.require
+
 require 'rspec/core/rake_task'
 require 'rdoc/task'
 

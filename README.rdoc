@@ -28,7 +28,8 @@ Documentation available at <http://rdoc.info/github/crohr/syslogger/master/file/
 
 * Install development dependencies:
 
-    $ gem install rake rdoc rspec
+    $ gem install bundler
+    $ bundle install
 
 * Run tests:
 
