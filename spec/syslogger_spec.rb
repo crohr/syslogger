@@ -22,6 +22,7 @@ describe "Syslogger" do
 
     it "should log #{logger_method} without raising an exception if called with a block" do
       logger = Syslogger.new
+      logger.level = Logger.const_get(logger_method.upcase)
       Syslog.stub!(:open).and_yield(syslog=mock("syslog", :mask= => true))
       severity = Syslogger::MAPPING[Logger.const_get(logger_method.upcase)]
       syslog.should_receive(:log).with(severity, "Some message that doesn't need to be in a block")
@@ -45,12 +46,38 @@ describe "Syslogger" do
     end
   end
 
+  %w{debug info warn error}.each do |logger_method|
+    it "should not log #{logger_method} when level is higher" do
+      logger = Syslogger.new
+      logger.level = Logger::FATAL
+      Syslog.should_not_receive(:open).with($0, Syslog::LOG_PID | Syslog::LOG_CONS, nil).and_yield(syslog=mock("syslog", :mask= => true))
+      syslog.should_not_receive(:log).with(Syslog::LOG_NOTICE, "Some message")
+      logger.send(logger_method.to_sym, "Some message")
+    end
+
+    it "should not evaluate a block or log #{logger_method} when level is higher" do
+      logger = Syslogger.new
+      logger.level = Logger::FATAL
+      Syslog.should_not_receive(:open).with($0, Syslog::LOG_PID | Syslog::LOG_CONS, nil).and_yield(syslog=mock("syslog", :mask= => true))
+      syslog.should_not_receive(:log).with(Syslog::LOG_NOTICE, "Some message")
+      logger.send(logger_method.to_sym) { violated "This block should not have been called" }
+    end
+  end
+
   it "should respond to <<" do
     logger = Syslogger.new("my_app", Syslog::LOG_PID, Syslog::LOG_USER)
     logger.should respond_to(:<<)
     Syslog.should_receive(:open).with("my_app", Syslog::LOG_PID, Syslog::LOG_USER).and_yield(syslog=mock("syslog", :mask= => true))
     syslog.should_receive(:log).with(Syslog::LOG_INFO, "yop")
     logger << "yop"
+  end
+
+  it "should respond to write" do
+    logger = Syslogger.new("my_app", Syslog::LOG_PID, Syslog::LOG_USER)
+    logger.should respond_to(:write)
+    Syslog.should_receive(:open).with("my_app", Syslog::LOG_PID, Syslog::LOG_USER).and_yield(syslog=mock("syslog", :mask= => true))
+    syslog.should_receive(:log).with(Syslog::LOG_INFO, "yop")
+    logger.write "yop"
   end
 
   describe "add" do
