@@ -9,6 +9,7 @@ tmtags
 *~
 \#*
 .\#*
+TAGS
 
 ## VIM
 *.swp
@@ -18,6 +19,9 @@ coverage
 rdoc
 pkg
 Gemfile.lock
+
+## Bundler
+.bundle
 
 ## PROJECT::SPECIFIC
 
