@@ -41,6 +41,10 @@ Documentation available at <http://rdoc.info/github/crohr/syslogger/master/file/
 
     $ gem build syslogger.gemspec
 
+== Changelog
+
+See <https://github.com/crohr/syslogger/commits/master>.
+
 == Contributions
 
 See <https://github.com/crohr/syslogger/contributors>.
