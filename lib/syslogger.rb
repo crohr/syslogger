@@ -4,7 +4,7 @@ require 'thread'
 
 class Syslogger
 
-  VERSION = "1.2.7"
+  VERSION = "1.3.0"
 
   attr_reader :level, :ident, :options, :facility
 
