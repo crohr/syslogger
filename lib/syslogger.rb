@@ -11,9 +11,9 @@ class Syslogger
   MAPPING = {
     Logger::DEBUG => Syslog::LOG_DEBUG,
     Logger::INFO => Syslog::LOG_INFO,
-    Logger::WARN => Syslog::LOG_NOTICE,
-    Logger::ERROR => Syslog::LOG_WARNING,
-    Logger::FATAL => Syslog::LOG_ERR,
+    Logger::WARN => Syslog::LOG_WARNING,
+    Logger::ERROR => Syslog::LOG_ERR,
+    Logger::FATAL => Syslog::LOG_CRIT,
     Logger::UNKNOWN => Syslog::LOG_ALERT
   }
 
@@ -110,7 +110,8 @@ class Syslogger
   # Borrowed from SyslogLogger.
   def clean(message)
     message = message.to_s.dup
-    message.strip!
+    message.strip! # remove whitespace
+    message.gsub!(/\n/, '\\n') # escape newlines
     message.gsub!(/%/, '%%') # syslog(3) freaks on % (printf)
     message.gsub!(/\e\[[^m]*m/, '') # remove useless ansi color codes
     message
