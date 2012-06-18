@@ -4,14 +4,14 @@ describe "Syslogger" do
   it "should log to the default syslog facility, with the default options" do
     logger = Syslogger.new
     Syslog.should_receive(:open).with($0, Syslog::LOG_PID | Syslog::LOG_CONS, nil).and_yield(syslog=mock("syslog", :mask= => true))
-    syslog.should_receive(:log).with(Syslog::LOG_NOTICE, "Some message")
+    syslog.should_receive(:log).with(Syslog::LOG_WARNING, "Some message")
     logger.warn "Some message"
   end
 
   it "should log to the user facility, with specific options" do
     logger = Syslogger.new("my_app", Syslog::LOG_PID, Syslog::LOG_USER)
     Syslog.should_receive(:open).with("my_app", Syslog::LOG_PID, Syslog::LOG_USER).and_yield(syslog=mock("syslog", :mask= => true))
-    syslog.should_receive(:log).with(Syslog::LOG_NOTICE, "Some message")
+    syslog.should_receive(:log).with(Syslog::LOG_WARNING, "Some message")
     logger.warn "Some message"
   end
 
