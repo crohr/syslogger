@@ -175,6 +175,19 @@ describe "Syslogger" do
     end
   end # describe "level="
 
+  describe "ident=" do
+    before(:each) do
+      @logger = Syslogger.new("my_app", Syslog::LOG_PID | Syslog::LOG_CONS, nil)
+    end
+
+    it "should permanently change the ident string" do
+      @logger.ident = "new_ident"
+      Syslog.should_receive(:open).with("new_ident", Syslog::LOG_PID | Syslog::LOG_CONS, nil).and_yield(syslog=mock("syslog", :mask= => true))
+      syslog.should_receive(:log)
+      @logger.warn("should get the new ident string")
+    end
+  end
+
   describe ":level? methods" do
     before(:each) do
       @logger = Syslogger.new("my_app", Syslog::LOG_PID, Syslog::LOG_USER)

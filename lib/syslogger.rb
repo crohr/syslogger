@@ -105,6 +105,11 @@ class Syslogger
     @level = level
   end
 
+  # Sets the ident string passed along to Syslog
+  def ident=(ident)
+    @ident = ident
+  end
+
   protected
 
   # Borrowed from SyslogLogger.
