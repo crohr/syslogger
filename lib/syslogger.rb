@@ -86,18 +86,16 @@ class Syslogger
     @mutex.synchronize do
       Syslog.open(progname, @options, @facility) do |s|
         s.mask = Syslog::LOG_UPTO(MAPPING[@level])
-        if message
-          cursor = 0
-          while(m = message.byteslice(cursor*MAXOCTETS,(cursor+1)*MAXOCTETS)) do
-            s.log(MAPPING[severity],clean(m)) unless m.empty?
-            cursor += 1
+        communication = clean(message || (block && block.call) || progname)
+        buffer = ""
+        communication.bytes do |byte|
+          buffer.concat(byte)
+          if buffer.bytesize >= MAXOCTETS
+            s.log(MAPPING[severity],buffer)
+            buffer = ""
           end
-        else
-          s.log(
-            MAPPING[severity],
-            clean((block && block.call) || progname)
-          )
         end
+        s.log(MAPPING[severity],buffer) unless buffer.empty?
       end
     end
   end
