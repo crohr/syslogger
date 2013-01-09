@@ -132,6 +132,14 @@ describe "Syslogger" do
       syslog.should_receive(:log).with(Syslog::LOG_INFO, "my_app")
       @logger.add(Logger::INFO, nil)
     end
+
+    it "should split string over the max octet size" do
+      Syslog.should_receive(:open).
+        with("my_app", Syslog::LOG_PID, Syslog::LOG_USER).
+        and_yield(syslog=mock("syslog", :mask= => true))
+      syslog.should_receive(:log).with(Syslog::LOG_INFO, "a"*480).twice
+      @logger.add(Logger::INFO, "a"*960)
+    end
   end # describe "add"
 
   describe "level=" do

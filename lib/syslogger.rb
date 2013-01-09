@@ -4,7 +4,7 @@ require 'thread'
 
 class Syslogger
 
-  VERSION = "1.4.1"
+  VERSION = "1.4.2"
 
   attr_reader :level, :ident, :options, :facility
 
@@ -76,19 +76,28 @@ class Syslogger
 
   # Low level method to add a message.
   # +severity+::  the level of the message. One of Logger::DEBUG, Logger::INFO, Logger::WARN, Logger::ERROR, Logger::FATAL, Logger::UNKNOWN
-  # +message+:: the message string. 
-  #             If nil, the method will call the block and use the result as the message string. 
+  # +message+:: the message string.
+  #             If nil, the method will call the block and use the result as the message string.
   #             If both are nil or no block is given, it will use the progname as per the behaviour of both the standard Ruby logger, and the Rails BufferedLogger.
   # +progname+:: optionally, overwrite the program name that appears in the log message.
+  MAXOCTETS=480
   def add(severity, message = nil, progname = nil, &block)
     progname ||= @ident
     @mutex.synchronize do
       Syslog.open(progname, @options, @facility) do |s|
         s.mask = Syslog::LOG_UPTO(MAPPING[@level])
-        s.log(
-          MAPPING[severity], 
-          clean(message || (block && block.call) || progname)
-        )
+        if message
+          cursor = 0
+          while(m = message.byteslice(cursor*MAXOCTETS,(cursor+1)*MAXOCTETS)) do
+            s.log(MAPPING[severity],clean(m)) unless m.empty?
+            cursor += 1
+          end
+        else
+          s.log(
+            MAPPING[severity],
+            clean((block && block.call) || progname)
+          )
+        end
       end
     end
   end
