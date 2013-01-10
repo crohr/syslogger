@@ -134,6 +134,7 @@ describe "Syslogger" do
     end
 
     it "should split string over the max octet size" do
+      @logger.max_octets = 480
       Syslog.should_receive(:open).
         with("my_app", Syslog::LOG_PID, Syslog::LOG_USER).
         and_yield(syslog=mock("syslog", :mask= => true))
@@ -141,6 +142,18 @@ describe "Syslogger" do
       @logger.add(Logger::INFO, "a"*960)
     end
   end # describe "add"
+
+  describe "max_octets=" do
+    before(:each) do
+      @logger = Syslogger.new("my_app", Syslog::LOG_PID, Syslog::LOG_USER)
+    end
+
+    it "should set the max_octets for the logger" do
+      -> { @logger.max_octets = 1 }.should change(@logger, :max_octets)
+      @logger.max_octets.should == 1
+    end
+
+  end
 
   describe "level=" do
     before(:each) do

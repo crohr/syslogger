@@ -4,9 +4,9 @@ require 'thread'
 
 class Syslogger
 
-  VERSION = "1.4.2"
+  VERSION = "1.4.1"
 
-  attr_reader :level, :ident, :options, :facility
+  attr_reader :level, :ident, :options, :facility, :max_octets
 
   MAPPING = {
     Logger::DEBUG => Syslog::LOG_DEBUG,
@@ -87,17 +87,26 @@ class Syslogger
       Syslog.open(progname, @options, @facility) do |s|
         s.mask = Syslog::LOG_UPTO(MAPPING[@level])
         communication = clean(message || (block && block.call) || progname)
-        buffer = ""
-        communication.bytes do |byte|
-          buffer.concat(byte)
-          if buffer.bytesize >= MAXOCTETS
-            s.log(MAPPING[severity],buffer)
-            buffer = ""
+        if self.max_octets
+          buffer = ""
+          communication.bytes do |byte|
+            buffer.concat(byte)
+            if buffer.bytesize >= self.max_octets
+              s.log(MAPPING[severity],buffer)
+              buffer = ""
+            end
           end
+          s.log(MAPPING[severity],buffer) unless buffer.empty?
+        else
+          s.log(MAPPING[severity],communication)
         end
-        s.log(MAPPING[severity],buffer) unless buffer.empty?
       end
     end
+  end
+
+  # Set the max octets of the messages written to the log
+  def max_octets=(max_octets)
+    @max_octets = max_octets
   end
 
   # Sets the minimum level for messages to be written in the log.
