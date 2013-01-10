@@ -149,7 +149,7 @@ describe "Syslogger" do
     end
 
     it "should set the max_octets for the logger" do
-      -> { @logger.max_octets = 1 }.should change(@logger, :max_octets)
+      lambda { @logger.max_octets = 1 }.should change(@logger, :max_octets)
       @logger.max_octets.should == 1
     end
 
