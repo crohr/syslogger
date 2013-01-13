@@ -80,7 +80,6 @@ class Syslogger
   #             If nil, the method will call the block and use the result as the message string.
   #             If both are nil or no block is given, it will use the progname as per the behaviour of both the standard Ruby logger, and the Rails BufferedLogger.
   # +progname+:: optionally, overwrite the program name that appears in the log message.
-  MAXOCTETS=480
   def add(severity, message = nil, progname = nil, &block)
     progname ||= @ident
     @mutex.synchronize do
