@@ -17,6 +17,9 @@ specify the facility and the syslog options.
   # Will send all messages to the local0 facility, adding the process id in the message
   logger = Syslogger.new("app_name", Syslog::LOG_PID, Syslog::LOG_LOCAL0)
   
+  # Optionally split messages to the specified number of bytes
+  logger.max_octets = 480
+  
   # Send messages that are at least of the Logger::INFO level
   logger.level = Logger::INFO # use Logger levels
   
