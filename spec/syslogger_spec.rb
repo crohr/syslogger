@@ -103,6 +103,24 @@ describe "Syslogger" do
       @logger.add(Logger::INFO, "message", "progname") { "my message" }
     end
 
+    it "should use the default progname when message is passed in progname" do
+      Syslog.should_receive(:open).
+        with("my_app", Syslog::LOG_PID, Syslog::LOG_USER).
+        and_yield(syslog = mock("syslog", :mask= => true))
+
+      syslog.should_receive(:log).with(Syslog::LOG_INFO, "message")
+      @logger.add(Logger::INFO, nil, "message")
+    end
+
+    it "should use the given progname if message is passed in block" do
+      Syslog.should_receive(:open).
+        with("progname", Syslog::LOG_PID, Syslog::LOG_USER).
+        and_yield(syslog = mock("syslog", :mask= => true))
+
+      syslog.should_receive(:log).with(Syslog::LOG_INFO, "message")
+      @logger.add(Logger::INFO, nil, "progname") { "message" }
+    end
+
     it "should substitute '%' for '%%' before adding the :message" do
       Syslog.stub(:open).and_yield(syslog=mock("syslog", :mask= => true))
       syslog.should_receive(:log).with(Syslog::LOG_INFO, "%%me%%ssage%%")
