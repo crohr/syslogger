@@ -85,7 +85,7 @@ class Syslogger
     @mutex.synchronize do
       Syslog.open(progname, @options, @facility) do |s|
         s.mask = Syslog::LOG_UPTO(MAPPING[@level])
-        communication = clean(message || (block && block.call) || progname)
+        communication = clean(message || block && block.call)
         if self.max_octets
           buffer = ""
           communication.bytes do |byte|
