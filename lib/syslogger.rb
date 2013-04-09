@@ -81,7 +81,11 @@ class Syslogger
   #             If both are nil or no block is given, it will use the progname as per the behaviour of both the standard Ruby logger, and the Rails BufferedLogger.
   # +progname+:: optionally, overwrite the program name that appears in the log message.
   def add(severity, message = nil, progname = nil, &block)
+    if message.nil? && block.nil? && !progname.nil? 
+      message, progname = progname, nil 
+    end
     progname ||= @ident
+
     @mutex.synchronize do
       Syslog.open(progname, @options, @facility) do |s|
         s.mask = Syslog::LOG_UPTO(MAPPING[@level])
