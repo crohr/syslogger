@@ -137,17 +137,17 @@ describe "Syslogger" do
       Syslog.should_receive(:open).
         with("my_app", Syslog::LOG_PID, Syslog::LOG_USER).
         and_yield(syslog=mock("syslog", :mask= => true))
-      syslog.should_receive(:log).with(Syslog::LOG_INFO, "my_app")
+      syslog.should_receive(:log).with(Syslog::LOG_INFO, "")
       lambda {
         @logger.add(Logger::INFO, nil)
       }.should_not raise_error
     end
 
-    it "should use given progname as the message if the message and block are nil" do
+    it "should send an empty string if the message and block are nil" do
       Syslog.should_receive(:open).
         with("my_app", Syslog::LOG_PID, Syslog::LOG_USER).
         and_yield(syslog=mock("syslog", :mask= => true))
-      syslog.should_receive(:log).with(Syslog::LOG_INFO, "my_app")
+      syslog.should_receive(:log).with(Syslog::LOG_INFO, "")
       @logger.add(Logger::INFO, nil)
     end
 
