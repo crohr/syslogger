@@ -2,11 +2,17 @@ require 'syslog'
 require 'logger'
 require 'thread'
 
+class SimpleFormatter < Logger::Formatter
+  def call(severity, timestamp, progname, msg)
+    "#{msg.is_a?(String) ? msg : msg.inspect}\n"
+  end
+end
+
 class Syslogger
 
   VERSION = "1.5.0"
 
-  attr_reader :level, :ident, :options, :facility, :max_octets
+  attr_reader :level, :ident, :options, :facility, :max_octets, :formatter
 
   MAPPING = {
     Logger::DEBUG => Syslog::LOG_DEBUG,
@@ -46,6 +52,7 @@ class Syslogger
     @facility = facility
     @level = Logger::INFO
     @mutex = Mutex.new
+    @formatter = SimpleFormatter.new
   end
 
   %w{debug info warn error fatal unknown}.each do |logger_method|
@@ -81,8 +88,8 @@ class Syslogger
   #             If both are nil or no block is given, it will use the progname as per the behaviour of both the standard Ruby logger, and the Rails BufferedLogger.
   # +progname+:: optionally, overwrite the program name that appears in the log message.
   def add(severity, message = nil, progname = nil, &block)
-    if message.nil? && block.nil? && !progname.nil? 
-      message, progname = progname, nil 
+    if message.nil? && block.nil? && !progname.nil?
+      message, progname = progname, nil
     end
     progname ||= @ident
 
