@@ -6,7 +6,7 @@ class Syslogger
 
   VERSION = "1.5.1"
 
-  attr_reader :level, :ident, :options, :facility, :max_octets, :formatter
+  attr_reader :default_level, :ident, :options, :facility, :max_octets, :formatter
 
   MAPPING = {
     Logger::DEBUG => Syslog::LOG_DEBUG,
@@ -44,7 +44,7 @@ class Syslogger
     @ident = ident
     @options = options || (Syslog::LOG_PID | Syslog::LOG_CONS)
     @facility = facility
-    @level = Logger::INFO
+    @default_level = Logger::INFO
     @mutex = Mutex.new
     @formatter = Logger::Formatter.new
   end
@@ -53,14 +53,14 @@ class Syslogger
     # Accepting *args as message could be nil.
     #  Default params not supported in ruby 1.8.7
     define_method logger_method.to_sym do |*args, &block|
-      return true if @level > Logger.const_get(logger_method.upcase)
+      return true if level > Logger.const_get(logger_method.upcase)
       message = args.first || block && block.call
       add(Logger.const_get(logger_method.upcase), message)
     end
 
     unless logger_method == 'unknown'
       define_method "#{logger_method}?".to_sym do
-        @level <= Logger.const_get(logger_method.upcase)
+        level <= Logger.const_get(logger_method.upcase)
       end
     end
   end
@@ -89,7 +89,7 @@ class Syslogger
 
     @mutex.synchronize do
       Syslog.open(progname, @options, @facility) do |s|
-        s.mask = Syslog::LOG_UPTO(MAPPING[@level])
+        s.mask = Syslog::LOG_UPTO(MAPPING[level])
         communication = clean(message || block && block.call)
         if self.max_octets
           buffer = ""
@@ -115,14 +115,16 @@ class Syslogger
 
   # Sets the minimum level for messages to be written in the log.
   # +level+:: one of <tt>Logger::DEBUG</tt>, <tt>Logger::INFO</tt>, <tt>Logger::WARN</tt>, <tt>Logger::ERROR</tt>, <tt>Logger::FATAL</tt>, <tt>Logger::UNKNOWN</tt>
-  def level=(level)
-    level = Logger.const_get(level.to_s.upcase) if level.is_a?(Symbol)
+  def level=(new_level)
+    Thread.current[:syslogger_level] = sanitize_level(new_level)
+  end
 
-    unless level.is_a?(Fixnum)
-      raise ArgumentError.new("Invalid logger level `#{level.inspect}`")
-    end
+  def default_level=(new_level)
+    @default_level = sanitize_level(new_level)
+  end
 
-    @level = level
+  def level
+    Thread.current[:syslogger_level] || default_level
   end
 
   # Sets the ident string passed along to Syslog
@@ -131,6 +133,14 @@ class Syslogger
   end
 
   protected
+
+  def sanitize_level(new_level)
+    new_level = Logger.const_get(new_level.to_s.upcase) if new_level.is_a?(Symbol)
+    unless new_level.is_a?(Fixnum)
+      raise ArgumentError.new("Invalid logger level `#{new_level.inspect}`")
+    end
+    new_level
+  end
 
   # Borrowed from SyslogLogger.
   def clean(message)
