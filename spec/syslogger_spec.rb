@@ -3,14 +3,14 @@ require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 describe "Syslogger" do
   it "should log to the default syslog facility, with the default options" do
     logger = Syslogger.new
-    Syslog.should_receive(:open).with($0, Syslog::LOG_PID | Syslog::LOG_CONS, nil).and_yield(syslog=mock("syslog", :mask= => true))
+    Syslog.should_receive(:open).with($0, Syslog::LOG_PID | Syslog::LOG_CONS, nil).and_yield(syslog=double("syslog", :mask= => true))
     syslog.should_receive(:log).with(Syslog::LOG_WARNING, "Some message")
     logger.warn "Some message"
   end
 
   it "should log to the user facility, with specific options" do
     logger = Syslogger.new("my_app", Syslog::LOG_PID, Syslog::LOG_USER)
-    Syslog.should_receive(:open).with("my_app", Syslog::LOG_PID, Syslog::LOG_USER).and_yield(syslog=mock("syslog", :mask= => true))
+    Syslog.should_receive(:open).with("my_app", Syslog::LOG_PID, Syslog::LOG_USER).and_yield(syslog=double("syslog", :mask= => true))
     syslog.should_receive(:log).with(Syslog::LOG_WARNING, "Some message")
     logger.warn "Some message"
   end
@@ -23,7 +23,7 @@ describe "Syslogger" do
     it "should log #{logger_method} without raising an exception if called with a block" do
       logger = Syslogger.new
       logger.level = Logger.const_get(logger_method.upcase)
-      Syslog.stub!(:open).and_yield(syslog=mock("syslog", :mask= => true))
+      Syslog.stub(:open).and_yield(syslog=double("syslog", :mask= => true))
       severity = Syslogger::MAPPING[Logger.const_get(logger_method.upcase)]
       syslog.should_receive(:log).with(severity, "Some message that doesn't need to be in a block")
       lambda {
@@ -50,7 +50,7 @@ describe "Syslogger" do
     it "should not log #{logger_method} when level is higher" do
       logger = Syslogger.new
       logger.level = Logger::FATAL
-      Syslog.should_not_receive(:open).with($0, Syslog::LOG_PID | Syslog::LOG_CONS, nil).and_yield(syslog=mock("syslog", :mask= => true))
+      Syslog.should_not_receive(:open).with($0, Syslog::LOG_PID | Syslog::LOG_CONS, nil).and_yield(syslog=double("syslog", :mask= => true))
       syslog.should_not_receive(:log).with(Syslog::LOG_NOTICE, "Some message")
       logger.send(logger_method.to_sym, "Some message")
     end
@@ -58,7 +58,7 @@ describe "Syslogger" do
     it "should not evaluate a block or log #{logger_method} when level is higher" do
       logger = Syslogger.new
       logger.level = Logger::FATAL
-      Syslog.should_not_receive(:open).with($0, Syslog::LOG_PID | Syslog::LOG_CONS, nil).and_yield(syslog=mock("syslog", :mask= => true))
+      Syslog.should_not_receive(:open).with($0, Syslog::LOG_PID | Syslog::LOG_CONS, nil).and_yield(syslog=double("syslog", :mask= => true))
       syslog.should_not_receive(:log).with(Syslog::LOG_NOTICE, "Some message")
       logger.send(logger_method.to_sym) { violated "This block should not have been called" }
     end
@@ -67,7 +67,7 @@ describe "Syslogger" do
   it "should respond to <<" do
     logger = Syslogger.new("my_app", Syslog::LOG_PID, Syslog::LOG_USER)
     logger.should respond_to(:<<)
-    Syslog.should_receive(:open).with("my_app", Syslog::LOG_PID, Syslog::LOG_USER).and_yield(syslog=mock("syslog", :mask= => true))
+    Syslog.should_receive(:open).with("my_app", Syslog::LOG_PID, Syslog::LOG_USER).and_yield(syslog=double("syslog", :mask= => true))
     syslog.should_receive(:log).with(Syslog::LOG_INFO, "yop")
     logger << "yop"
   end
@@ -75,7 +75,7 @@ describe "Syslogger" do
   it "should respond to write" do
     logger = Syslogger.new("my_app", Syslog::LOG_PID, Syslog::LOG_USER)
     logger.should respond_to(:write)
-    Syslog.should_receive(:open).with("my_app", Syslog::LOG_PID, Syslog::LOG_USER).and_yield(syslog=mock("syslog", :mask= => true))
+    Syslog.should_receive(:open).with("my_app", Syslog::LOG_PID, Syslog::LOG_USER).and_yield(syslog=double("syslog", :mask= => true))
     syslog.should_receive(:log).with(Syslog::LOG_INFO, "yop")
     logger.write "yop"
   end
@@ -88,17 +88,17 @@ describe "Syslogger" do
       @logger.should respond_to(:add)
     end
     it "should correctly log" do
-      Syslog.should_receive(:open).with("my_app", Syslog::LOG_PID, Syslog::LOG_USER).and_yield(syslog=mock("syslog", :mask= => true))
+      Syslog.should_receive(:open).with("my_app", Syslog::LOG_PID, Syslog::LOG_USER).and_yield(syslog=double("syslog", :mask= => true))
       syslog.should_receive(:log).with(Syslog::LOG_INFO, "message")
       @logger.add(Logger::INFO, "message")
     end
     it "should take the message from the block if :message is nil" do
-      Syslog.should_receive(:open).with("my_app", Syslog::LOG_PID, Syslog::LOG_USER).and_yield(syslog=mock("syslog", :mask= => true))
+      Syslog.should_receive(:open).with("my_app", Syslog::LOG_PID, Syslog::LOG_USER).and_yield(syslog=double("syslog", :mask= => true))
       syslog.should_receive(:log).with(Syslog::LOG_INFO, "my message")
       @logger.add(Logger::INFO) { "my message" }
     end
     it "should use the given progname" do
-      Syslog.should_receive(:open).with("progname", Syslog::LOG_PID, Syslog::LOG_USER).and_yield(syslog=mock("syslog", :mask= => true))
+      Syslog.should_receive(:open).with("progname", Syslog::LOG_PID, Syslog::LOG_USER).and_yield(syslog=double("syslog", :mask= => true))
       syslog.should_receive(:log).with(Syslog::LOG_INFO, "message")
       @logger.add(Logger::INFO, "message", "progname") { "my message" }
     end
@@ -106,7 +106,7 @@ describe "Syslogger" do
     it "should use the default progname when message is passed in progname" do
       Syslog.should_receive(:open).
         with("my_app", Syslog::LOG_PID, Syslog::LOG_USER).
-        and_yield(syslog = mock("syslog", :mask= => true))
+        and_yield(syslog = double("syslog", :mask= => true))
 
       syslog.should_receive(:log).with(Syslog::LOG_INFO, "message")
       @logger.add(Logger::INFO, nil, "message")
@@ -115,20 +115,20 @@ describe "Syslogger" do
     it "should use the given progname if message is passed in block" do
       Syslog.should_receive(:open).
         with("progname", Syslog::LOG_PID, Syslog::LOG_USER).
-        and_yield(syslog = mock("syslog", :mask= => true))
+        and_yield(syslog = double("syslog", :mask= => true))
 
       syslog.should_receive(:log).with(Syslog::LOG_INFO, "message")
       @logger.add(Logger::INFO, nil, "progname") { "message" }
     end
 
     it "should substitute '%' for '%%' before adding the :message" do
-      Syslog.stub(:open).and_yield(syslog=mock("syslog", :mask= => true))
+      Syslog.stub(:open).and_yield(syslog=double("syslog", :mask= => true))
       syslog.should_receive(:log).with(Syslog::LOG_INFO, "%%me%%ssage%%")
       @logger.add(Logger::INFO, "%me%ssage%")
     end
 
     it "should strip the :message" do
-      Syslog.stub(:open).and_yield(syslog=mock("syslog", :mask= => true))
+      Syslog.stub(:open).and_yield(syslog=double("syslog", :mask= => true))
       syslog.should_receive(:log).with(Syslog::LOG_INFO, "message")
       @logger.add(Logger::INFO, "\n\nmessage  ")
     end
@@ -136,7 +136,7 @@ describe "Syslogger" do
     it "should not raise exception if asked to log with a nil message and body" do
       Syslog.should_receive(:open).
         with("my_app", Syslog::LOG_PID, Syslog::LOG_USER).
-        and_yield(syslog=mock("syslog", :mask= => true))
+        and_yield(syslog=double("syslog", :mask= => true))
       syslog.should_receive(:log).with(Syslog::LOG_INFO, "")
       lambda {
         @logger.add(Logger::INFO, nil)
@@ -146,7 +146,7 @@ describe "Syslogger" do
     it "should send an empty string if the message and block are nil" do
       Syslog.should_receive(:open).
         with("my_app", Syslog::LOG_PID, Syslog::LOG_USER).
-        and_yield(syslog=mock("syslog", :mask= => true))
+        and_yield(syslog=double("syslog", :mask= => true))
       syslog.should_receive(:log).with(Syslog::LOG_INFO, "")
       @logger.add(Logger::INFO, nil)
     end
@@ -155,7 +155,7 @@ describe "Syslogger" do
       @logger.max_octets = 480
       Syslog.should_receive(:open).
         with("my_app", Syslog::LOG_PID, Syslog::LOG_USER).
-        and_yield(syslog=mock("syslog", :mask= => true))
+        and_yield(syslog=double("syslog", :mask= => true))
       syslog.should_receive(:log).with(Syslog::LOG_INFO, "a"*480).twice
       @logger.add(Logger::INFO, "a"*960)
     end
@@ -221,7 +221,7 @@ describe "Syslogger" do
 
     it "should permanently change the ident string" do
       @logger.ident = "new_ident"
-      Syslog.should_receive(:open).with("new_ident", Syslog::LOG_PID | Syslog::LOG_CONS, nil).and_yield(syslog=mock("syslog", :mask= => true))
+      Syslog.should_receive(:open).with("new_ident", Syslog::LOG_PID | Syslog::LOG_CONS, nil).and_yield(syslog=double("syslog", :mask= => true))
       syslog.should_receive(:log)
       @logger.warn("should get the new ident string")
     end

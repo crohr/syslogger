@@ -6,7 +6,8 @@ class Syslogger
 
   VERSION = "1.5.1"
 
-  attr_reader :level, :ident, :options, :facility, :max_octets, :formatter
+  attr_reader :level, :ident, :options, :facility, :max_octets
+  attr_accessor :formatter
 
   MAPPING = {
     Logger::DEBUG => Syslog::LOG_DEBUG,
