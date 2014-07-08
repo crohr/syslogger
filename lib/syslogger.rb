@@ -96,7 +96,8 @@ class Syslogger
           buffer = ""
           communication.bytes do |byte|
             buffer.concat(byte)
-            if buffer.bytesize >= self.max_octets
+            # if the last byte we added is potentially part of an escape, we'll go ahead and add another byte
+            if buffer.bytesize >= self.max_octets && !['%'.ord,'\\'.ord].include?(byte)
               s.log(MAPPING[severity],buffer)
               buffer = ""
             end
