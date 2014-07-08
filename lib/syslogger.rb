@@ -93,7 +93,7 @@ class Syslogger
         s.mask = Syslog::LOG_UPTO(MAPPING[@level])
         communication = clean(message || block && block.call)
         if self.max_octets
-          buffer = ""
+          buffer = "#{tags_text}"
           communication.bytes do |byte|
             buffer.concat(byte)
             # if the last byte we added is potentially part of an escape, we'll go ahead and add another byte
@@ -104,7 +104,7 @@ class Syslogger
           end
           s.log(MAPPING[severity],buffer) unless buffer.empty?
         else
-          s.log(MAPPING[severity],communication)
+          s.log(MAPPING[severity],"#{tags_text}#{communication}")
         end
       end
     end
@@ -131,6 +131,28 @@ class Syslogger
   def ident=(ident)
     @ident = ident
   end
+  
+  # Tagging code borrowed from ActiveSupport gem
+  def tagged(*tags)
+    new_tags = push_tags(*tags)
+    yield self
+  ensure
+    pop_tags(new_tags.size)
+  end
+
+  def push_tags(*tags)
+    tags.flatten.reject{ |i| i.respond_to?(:empty?) ? i.empty? : !i }.tap do |new_tags|
+      current_tags.concat new_tags
+    end
+  end
+
+  def pop_tags(size = 1)
+    current_tags.pop size
+  end
+
+  def clear_tags!
+    current_tags.clear
+  end
 
   protected
 
@@ -142,5 +164,18 @@ class Syslogger
     message.gsub!(/%/, '%%') # syslog(3) freaks on % (printf)
     message.gsub!(/\e\[[^m]*m/, '') # remove useless ansi color codes
     message
+  end
+  
+  private
+  
+  def tags_text
+    tags = current_tags
+    if tags.any?
+      tags.collect { |tag| "[#{tag}] " }.join
+    end
+  end
+
+  def current_tags
+    Thread.current[:syslogger_tagged_logging_tags] ||= []
   end
 end
