@@ -44,6 +44,17 @@ describe "Syslogger" do
         logger.send(logger_method.to_sym)
       }.should_not raise_error
     end
+
+    it "should log #{logger_method} without raising an exception if message splits on an escape" do
+      logger = Syslogger.new
+      logger.max_octets=100
+      msg="A"*99
+      msg+="%BBB"
+      lambda {
+        logger.send(logger_method.to_sym,msg)
+      }.should_not raise_error
+    end
+
   end
 
   %w{debug info warn error}.each do |logger_method|
