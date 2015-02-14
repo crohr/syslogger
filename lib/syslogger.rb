@@ -11,7 +11,7 @@ class Syslogger
 
   MAPPING = {
     Logger::DEBUG => Syslog::LOG_DEBUG,
-    Logger::INFO => Syslog::LOG_INFO,
+    Logger::INFO => Syslog::LOG_NOTICE,
     Logger::WARN => Syslog::LOG_WARNING,
     Logger::ERROR => Syslog::LOG_ERR,
     Logger::FATAL => Syslog::LOG_CRIT,
@@ -131,7 +131,7 @@ class Syslogger
   def ident=(ident)
     @ident = ident
   end
-  
+
   # Tagging code borrowed from ActiveSupport gem
   def tagged(*tags)
     new_tags = push_tags(*tags)
@@ -165,9 +165,9 @@ class Syslogger
     message.gsub!(/\e\[[^m]*m/, '') # remove useless ansi color codes
     message
   end
-  
+
   private
-  
+
   def tags_text
     tags = current_tags
     if tags.any?

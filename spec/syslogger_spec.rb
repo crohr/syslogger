@@ -1,6 +1,9 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
 describe "Syslogger" do
+
+  expected_info_level = Syslog::LOG_NOTICE
+
   it "should log to the default syslog facility, with the default options" do
     logger = Syslogger.new
     Syslog.should_receive(:open).with($0, Syslog::LOG_PID | Syslog::LOG_CONS, nil).and_yield(syslog=double("syslog", :mask= => true))
@@ -79,7 +82,7 @@ describe "Syslogger" do
     logger = Syslogger.new("my_app", Syslog::LOG_PID, Syslog::LOG_USER)
     logger.should respond_to(:<<)
     Syslog.should_receive(:open).with("my_app", Syslog::LOG_PID, Syslog::LOG_USER).and_yield(syslog=double("syslog", :mask= => true))
-    syslog.should_receive(:log).with(Syslog::LOG_INFO, "yop")
+    syslog.should_receive(:log).with(expected_info_level, "yop")
     logger << "yop"
   end
 
@@ -87,7 +90,7 @@ describe "Syslogger" do
     logger = Syslogger.new("my_app", Syslog::LOG_PID, Syslog::LOG_USER)
     logger.should respond_to(:write)
     Syslog.should_receive(:open).with("my_app", Syslog::LOG_PID, Syslog::LOG_USER).and_yield(syslog=double("syslog", :mask= => true))
-    syslog.should_receive(:log).with(Syslog::LOG_INFO, "yop")
+    syslog.should_receive(:log).with(expected_info_level, "yop")
     logger.write "yop"
   end
 
@@ -100,17 +103,17 @@ describe "Syslogger" do
     end
     it "should correctly log" do
       Syslog.should_receive(:open).with("my_app", Syslog::LOG_PID, Syslog::LOG_USER).and_yield(syslog=double("syslog", :mask= => true))
-      syslog.should_receive(:log).with(Syslog::LOG_INFO, "message")
+      syslog.should_receive(:log).with(expected_info_level, "message")
       @logger.add(Logger::INFO, "message")
     end
     it "should take the message from the block if :message is nil" do
       Syslog.should_receive(:open).with("my_app", Syslog::LOG_PID, Syslog::LOG_USER).and_yield(syslog=double("syslog", :mask= => true))
-      syslog.should_receive(:log).with(Syslog::LOG_INFO, "my message")
+      syslog.should_receive(:log).with(expected_info_level, "my message")
       @logger.add(Logger::INFO) { "my message" }
     end
     it "should use the given progname" do
       Syslog.should_receive(:open).with("progname", Syslog::LOG_PID, Syslog::LOG_USER).and_yield(syslog=double("syslog", :mask= => true))
-      syslog.should_receive(:log).with(Syslog::LOG_INFO, "message")
+      syslog.should_receive(:log).with(expected_info_level, "message")
       @logger.add(Logger::INFO, "message", "progname") { "my message" }
     end
 
@@ -119,7 +122,7 @@ describe "Syslogger" do
         with("my_app", Syslog::LOG_PID, Syslog::LOG_USER).
         and_yield(syslog = double("syslog", :mask= => true))
 
-      syslog.should_receive(:log).with(Syslog::LOG_INFO, "message")
+      syslog.should_receive(:log).with(expected_info_level, "message")
       @logger.add(Logger::INFO, nil, "message")
     end
 
@@ -128,19 +131,19 @@ describe "Syslogger" do
         with("progname", Syslog::LOG_PID, Syslog::LOG_USER).
         and_yield(syslog = double("syslog", :mask= => true))
 
-      syslog.should_receive(:log).with(Syslog::LOG_INFO, "message")
+      syslog.should_receive(:log).with(expected_info_level, "message")
       @logger.add(Logger::INFO, nil, "progname") { "message" }
     end
 
     it "should substitute '%' for '%%' before adding the :message" do
       Syslog.stub(:open).and_yield(syslog=double("syslog", :mask= => true))
-      syslog.should_receive(:log).with(Syslog::LOG_INFO, "%%me%%ssage%%")
+      syslog.should_receive(:log).with(expected_info_level, "%%me%%ssage%%")
       @logger.add(Logger::INFO, "%me%ssage%")
     end
 
     it "should strip the :message" do
       Syslog.stub(:open).and_yield(syslog=double("syslog", :mask= => true))
-      syslog.should_receive(:log).with(Syslog::LOG_INFO, "message")
+      syslog.should_receive(:log).with(expected_info_level, "message")
       @logger.add(Logger::INFO, "\n\nmessage  ")
     end
 
@@ -148,7 +151,7 @@ describe "Syslogger" do
       Syslog.should_receive(:open).
         with("my_app", Syslog::LOG_PID, Syslog::LOG_USER).
         and_yield(syslog=double("syslog", :mask= => true))
-      syslog.should_receive(:log).with(Syslog::LOG_INFO, "")
+      syslog.should_receive(:log).with(expected_info_level, "")
       lambda {
         @logger.add(Logger::INFO, nil)
       }.should_not raise_error
@@ -158,7 +161,7 @@ describe "Syslogger" do
       Syslog.should_receive(:open).
         with("my_app", Syslog::LOG_PID, Syslog::LOG_USER).
         and_yield(syslog=double("syslog", :mask= => true))
-      syslog.should_receive(:log).with(Syslog::LOG_INFO, "")
+      syslog.should_receive(:log).with(expected_info_level, "")
       @logger.add(Logger::INFO, nil)
     end
 
@@ -167,7 +170,7 @@ describe "Syslogger" do
       Syslog.should_receive(:open).
         with("my_app", Syslog::LOG_PID, Syslog::LOG_USER).
         and_yield(syslog=double("syslog", :mask= => true))
-      syslog.should_receive(:log).with(Syslog::LOG_INFO, "a"*480).twice
+      syslog.should_receive(:log).with(expected_info_level, "a"*480).twice
       @logger.add(Logger::INFO, "a"*960)
     end
   end # describe "add"
