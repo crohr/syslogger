@@ -47,7 +47,9 @@ class Syslogger
     @facility = facility
     @level = Logger::INFO
     @mutex = Mutex.new
-    @formatter = Logger::Formatter.new
+    @formatter = proc do |severity, datetime, progname, msg|
+      msg
+    end
   end
 
   %w{debug info warn error fatal unknown}.each do |logger_method|
@@ -92,9 +94,10 @@ class Syslogger
       Syslog.open(progname, @options, @facility) do |s|
         s.mask = Syslog::LOG_UPTO(MAPPING[@level])
         communication = clean(message || block && block.call)
+        formatted_communication = formatter.call([severity], Time.now, progname, communication)
         if self.max_octets
           buffer = "#{tags_text}"
-          communication.bytes do |byte|
+          formatted_communication.bytes do |byte|
             buffer.concat(byte)
             # if the last byte we added is potentially part of an escape, we'll go ahead and add another byte
             if buffer.bytesize >= self.max_octets && !['%'.ord,'\\'.ord].include?(byte)
@@ -104,7 +107,7 @@ class Syslogger
           end
           s.log(MAPPING[severity],buffer) unless buffer.empty?
         else
-          s.log(MAPPING[severity],"#{tags_text}#{communication}")
+          s.log(MAPPING[severity],"#{tags_text}#{formatted_communication}")
         end
       end
     end

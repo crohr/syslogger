@@ -170,6 +170,15 @@ describe "Syslogger" do
       syslog.should_receive(:log).with(Syslog::LOG_INFO, "a"*480).twice
       @logger.add(Logger::INFO, "a"*960)
     end
+
+    it "should apply the log formatter to the message" do
+      Syslog.stub(:open).and_yield(syslog=double("syslog", :mask= => true))
+      syslog.should_receive(:log).with(Syslog::LOG_INFO, "test message!")
+      @logger.formatter = proc do |severity, datetime, progname, msg|
+        "test #{msg}!"
+      end
+      @logger.add(Logger::INFO, "message")
+    end
   end # describe "add"
 
   describe "max_octets=" do
