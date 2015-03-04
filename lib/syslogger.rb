@@ -4,7 +4,7 @@ require 'thread'
 
 class Syslogger
 
-  VERSION = "1.6.0"
+  VERSION = "1.6.1"
 
   attr_reader :level, :ident, :options, :facility, :max_octets
   attr_accessor :formatter
@@ -134,7 +134,7 @@ class Syslogger
   def ident=(ident)
     @ident = ident
   end
-  
+
   # Tagging code borrowed from ActiveSupport gem
   def tagged(*tags)
     new_tags = push_tags(*tags)
@@ -168,9 +168,9 @@ class Syslogger
     message.gsub!(/\e\[[^m]*m/, '') # remove useless ansi color codes
     message
   end
-  
+
   private
-  
+
   def tags_text
     tags = current_tags
     if tags.any?
