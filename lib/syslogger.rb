@@ -40,6 +40,7 @@ class Syslogger
   #   logger.level = Logger::INFO # use Logger levels
   #   logger.warn "warning message"
   #   logger.debug "debug message"
+  #   logger.info "my_subapp" { "Some lazily computed message" }
   #
   def initialize(ident = $0, options = Syslog::LOG_PID | Syslog::LOG_CONS, facility = nil)
     @ident = ident
@@ -57,8 +58,8 @@ class Syslogger
     #  Default params not supported in ruby 1.8.7
     define_method logger_method.to_sym do |*args, &block|
       return true if @level > Logger.const_get(logger_method.upcase)
-      message = args.first || block && block.call
-      add(Logger.const_get(logger_method.upcase), message)
+      severity = Logger.const_get(logger_method.upcase)
+      add(severity, nil, args.first, &block)
     end
 
     unless logger_method == 'unknown'
