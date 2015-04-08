@@ -57,8 +57,8 @@ class Syslogger
     # Accepting *args as message could be nil.
     #  Default params not supported in ruby 1.8.7
     define_method logger_method.to_sym do |*args, &block|
-      return true if @level > Logger.const_get(logger_method.upcase)
       severity = Logger.const_get(logger_method.upcase)
+      return true if @level > severity
       add(severity, nil, args.first, &block)
     end
 
