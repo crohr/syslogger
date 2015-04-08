@@ -31,6 +31,18 @@ describe "Syslogger" do
       }.should_not raise_error
     end
 
+    it "should log #{logger_method} using message as progname with the block's result" do
+      logger = Syslogger.new
+      logger.level = Logger.const_get(logger_method.upcase)
+      Syslog.should_receive(:open).with("Woah", anything, nil)
+        .and_yield(syslog=double("syslog", :mask= => true))
+      severity = Syslogger::MAPPING[Logger.const_get(logger_method.upcase)]
+      syslog.should_receive(:log).with(severity, "Some message that really needs a block")
+      lambda {
+        logger.send(logger_method.to_sym, "Woah") { "Some message that really needs a block" }
+      }.should_not raise_error
+    end
+
     it "should log #{logger_method} without raising an exception if called with a nil message" do
       logger = Syslogger.new
       lambda {
@@ -54,7 +66,6 @@ describe "Syslogger" do
         logger.send(logger_method.to_sym,msg)
       }.should_not raise_error
     end
-
   end
 
   %w{debug info warn error}.each do |logger_method|
