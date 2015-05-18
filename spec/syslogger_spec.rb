@@ -102,6 +102,26 @@ describe "Syslogger" do
     logger.write "yop"
   end
 
+  it "should allow multiple instances to log at the same time" do
+    logger1 = Syslogger.new("my_app1", Syslog::LOG_PID, Syslog::LOG_USER)
+    logger2 = Syslogger.new("my_app2", Syslog::LOG_PID, Syslog::LOG_USER)
+
+    thread1 = Thread.new do
+      5000.times do |i|
+        logger1.write "logger1"
+      end
+    end
+
+    thread2 = Thread.new do
+      5000.times do |i|
+        logger2.write "logger1"
+      end
+    end
+
+    thread1.join
+    thread2.join
+  end
+
   describe "add" do
     before do
       @logger = Syslogger.new("my_app", Syslog::LOG_PID, Syslog::LOG_USER)
