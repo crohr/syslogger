@@ -47,10 +47,10 @@ class Syslogger
     @options = options || (Syslog::LOG_PID | Syslog::LOG_CONS)
     @facility = facility
     @level = Logger::INFO
-    @mutex = Mutex.new
     @formatter = proc do |severity, datetime, progname, msg|
       msg
     end
+    @@mutex = Mutex.new
   end
 
   %w{debug info warn error fatal unknown}.each do |logger_method|
@@ -91,7 +91,7 @@ class Syslogger
     end
     progname ||= @ident
 
-    @mutex.synchronize do
+    @@mutex.synchronize do
       Syslog.open(progname, @options, @facility) do |s|
         s.mask = Syslog::LOG_UPTO(MAPPING[@level])
         communication = clean(message || block && block.call)
