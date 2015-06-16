@@ -5,6 +5,8 @@ require 'thread'
 class Syslogger
 
   VERSION = "1.6.2"
+  
+  MUTEX = Mutex.new
 
   attr_reader :level, :ident, :options, :facility, :max_octets
   attr_accessor :formatter
@@ -50,7 +52,6 @@ class Syslogger
     @formatter = proc do |severity, datetime, progname, msg|
       msg
     end
-    @@mutex = Mutex.new
   end
 
   %w{debug info warn error fatal unknown}.each do |logger_method|
@@ -90,12 +91,13 @@ class Syslogger
       message, progname = progname, nil
     end
     progname ||= @ident
-
-    @@mutex.synchronize do
+    mask = Syslog::LOG_UPTO(MAPPING[@level])
+    communication = clean(message || block && block.call)
+    formatted_communication = formatter.call([severity], Time.now, progname, communication)
+    
+    MUTEX.synchronize do
       Syslog.open(progname, @options, @facility) do |s|
-        s.mask = Syslog::LOG_UPTO(MAPPING[@level])
-        communication = clean(message || block && block.call)
-        formatted_communication = formatter.call([severity], Time.now, progname, communication)
+        s.mask = mask
         if self.max_octets
           buffer = "#{tags_text}"
           formatted_communication.bytes do |byte|
