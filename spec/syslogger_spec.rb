@@ -121,6 +121,20 @@ describe "Syslogger" do
     thread1.join
     thread2.join
   end
+  
+  it "should not fail under chaos" do
+    threads = []
+    (1..10).each do
+      threads << Thread.new do
+        (1..100).each do |index|
+          logger = Syslogger.new(Thread.current.inspect, Syslog::LOG_PID, Syslog::LOG_USER)
+          logger.write index
+        end
+      end
+    end
+    
+    threads.each{|thread| thread.join }
+  end
 
   describe "add" do
     before do
