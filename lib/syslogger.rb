@@ -92,8 +92,8 @@ class Syslogger
     end
     progname ||= @ident
     mask = Syslog::LOG_UPTO(MAPPING[@level])
-    communication = clean(message || block && block.call)
-    formatted_communication = formatter.call([severity], Time.now, progname, communication)
+    communication = message || block && block.call
+    formatted_communication = clean(formatter.call([severity], Time.now, progname, communication))
     
     MUTEX.synchronize do
       Syslog.open(progname, @options, @facility) do |s|
@@ -177,7 +177,7 @@ class Syslogger
   def tags_text
     tags = current_tags
     if tags.any?
-      tags.collect { |tag| "[#{tag}] " }.join
+      clean(tags.collect { |tag| "[#{tag}] " }.join) << " "
     end
   end
 
