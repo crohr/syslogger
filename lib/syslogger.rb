@@ -4,7 +4,7 @@ require 'thread'
 
 class Syslogger
 
-  VERSION = "1.6.3"
+  VERSION = "1.6.4"
   
   MUTEX = Mutex.new
 
