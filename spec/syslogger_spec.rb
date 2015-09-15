@@ -182,6 +182,33 @@ describe "Syslogger" do
       syslog.should_receive(:log).with(Syslog::LOG_INFO, "%%me%%ssage%%")
       @logger.add(Logger::INFO, "%me%ssage%")
     end
+    
+    it "should clean formatted message" do
+      Syslog.stub(:open).and_yield(syslog=double("syslog", :mask= => true))
+      syslog.should_receive(:log).with(Syslog::LOG_INFO, "m%%e%%s%%s%%a%%g%%e")
+      
+      original_formatter = @logger.formatter
+      begin
+        @logger.formatter = proc do |severity, datetime, progname, msg|
+          msg.split(//).join('%')
+        end
+        
+        @logger.add(Logger::INFO, "message")
+      ensure
+        @logger.formatter = original_formatter
+      end
+    end
+    
+    it "should clean tagged message" do
+      Syslog.stub(:open).and_yield(syslog=double("syslog", :mask= => true))
+      syslog.should_receive(:log).with(Syslog::LOG_INFO, "[t%%a%%g%%g%%e%%d] [it] message")
+      
+      @logger.tagged("t%a%g%g%e%d") do
+        @logger.tagged("it") do
+          @logger.add(Logger::INFO, "message")
+        end
+      end
+    end
 
     it "should strip the :message" do
       Syslog.stub(:open).and_yield(syslog=double("syslog", :mask= => true))
