@@ -5,7 +5,7 @@ require 'thread'
 class Syslogger
 
   VERSION = "1.6.4"
-  
+
   MUTEX = Mutex.new
 
   attr_reader :level, :ident, :options, :facility, :max_octets
@@ -94,7 +94,7 @@ class Syslogger
     mask = Syslog::LOG_UPTO(MAPPING[@level])
     communication = message || block && block.call
     formatted_communication = clean(formatter.call([severity], Time.now, progname, communication))
-    
+
     MUTEX.synchronize do
       Syslog.open(progname, @options, @facility) do |s|
         s.mask = mask
@@ -160,6 +160,10 @@ class Syslogger
     current_tags.clear
   end
 
+  def current_tags
+    Thread.current[:syslogger_tagged_logging_tags] ||= []
+  end
+
   protected
 
   # Borrowed from SyslogLogger.
@@ -179,9 +183,5 @@ class Syslogger
     if tags.any?
       clean(tags.collect { |tag| "[#{tag}] " }.join) << " "
     end
-  end
-
-  def current_tags
-    Thread.current[:syslogger_tagged_logging_tags] ||= []
   end
 end

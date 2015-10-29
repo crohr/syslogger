@@ -378,4 +378,16 @@ describe "Syslogger" do
     end
   end # describe ":level? methods"
 
+  describe "#push_tags" do
+    before do
+      @logger = Syslogger.new("my_app", Syslog::LOG_PID, Syslog::LOG_USER)
+      @logger.push_tags("tag1")
+      @logger.push_tags("tag2")
+    end
+
+    it "saves tags" do
+      @logger.current_tags.should == ["tag1", "tag2"]
+    end
+  end
+
 end # describe "Syslogger"
