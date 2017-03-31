@@ -281,7 +281,7 @@ describe "Syslogger" do
         @logger.level.should equal level_value
       end
 
-      it "should allow using Fixnum #{level_value}" do
+      it "should allow using Integer #{level_value}" do
         @logger.level = level_value
         @logger.level.should equal level_value
       end
