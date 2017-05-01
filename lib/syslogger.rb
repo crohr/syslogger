@@ -126,7 +126,7 @@ class Syslogger
   def level=(level)
     level = Logger.const_get(level.to_s.upcase) if level.is_a?(Symbol)
 
-    unless level.is_a?(Fixnum)
+    unless level.is_a?(Integer)
       raise ArgumentError.new("Invalid logger level `#{level.inspect}`")
     end
 
