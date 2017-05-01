@@ -127,7 +127,7 @@ class Syslogger
 
   def push_tags(*tags)
     tags.flatten.reject { |i| i.respond_to?(:empty?) ? i.empty? : !i }.tap do |new_tags|
-      current_tags.concat new_tags
+      current_tags.concat(new_tags).uniq!
     end
   end
 

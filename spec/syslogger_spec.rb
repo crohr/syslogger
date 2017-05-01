@@ -404,6 +404,13 @@ describe Syslogger do
     it 'saves tags' do
       expect(@logger.current_tags).to eq ['tag1', 'tag2']
     end
+
+    it 'saves uniq tags' do
+      @logger.push_tags('tag1')
+      @logger.push_tags('tag2')
+      @logger.push_tags('foo')
+      expect(@logger.current_tags).to eq ['tag1', 'tag2', 'foo']
+    end
   end
 
   describe '#clear_tags' do
@@ -412,7 +419,7 @@ describe Syslogger do
     end
 
     it 'clears tags' do
-      expect(@logger.current_tags).to eq ['tag1', 'tag2']
+      expect(@logger.current_tags).to eq ['tag1', 'tag2', 'foo']
       @logger.clear_tags!
       expect(@logger.current_tags).to eq []
     end
