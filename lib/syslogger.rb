@@ -79,6 +79,10 @@ class Syslogger
   def <<(msg)
     add(Logger::INFO, msg)
   end
+  
+  def puts(msg)
+    add(Logger::INFO, msg)
+  end
 
   # Low level method to add a message.
   # +severity+::  the level of the message. One of Logger::DEBUG, Logger::INFO, Logger::WARN, Logger::ERROR, Logger::FATAL, Logger::UNKNOWN
