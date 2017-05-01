@@ -4,8 +4,6 @@ require 'thread'
 
 class Syslogger
 
-  VERSION = "1.6.4"
-
   MUTEX = Mutex.new
 
   attr_reader :level, :ident, :options, :facility, :max_octets
