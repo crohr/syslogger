@@ -12,13 +12,13 @@ class Syslogger
   attr_accessor :formatter
 
   MAPPING = {
-    Logger::DEBUG => Syslog::LOG_DEBUG,
-    Logger::INFO => Syslog::LOG_INFO,
-    Logger::WARN => Syslog::LOG_WARNING,
-    Logger::ERROR => Syslog::LOG_ERR,
-    Logger::FATAL => Syslog::LOG_CRIT,
+    Logger::DEBUG   => Syslog::LOG_DEBUG,
+    Logger::INFO    => Syslog::LOG_INFO,
+    Logger::WARN    => Syslog::LOG_WARNING,
+    Logger::ERROR   => Syslog::LOG_ERR,
+    Logger::FATAL   => Syslog::LOG_CRIT,
     Logger::UNKNOWN => Syslog::LOG_ALERT
-  }
+  }.freeze
 
   #
   # Initializes default options for the logger
@@ -49,7 +49,7 @@ class Syslogger
     @options = options || (Syslog::LOG_PID | Syslog::LOG_CONS)
     @facility = facility
     @level = Logger::INFO
-    @formatter = proc do |severity, datetime, progname, msg|
+    @formatter = proc do |_, _, _, msg|
       msg
     end
   end
@@ -79,7 +79,7 @@ class Syslogger
   def <<(msg)
     add(Logger::INFO, msg)
   end
-  
+
   def puts(msg)
     add(Logger::INFO, msg)
   end
@@ -99,25 +99,8 @@ class Syslogger
     communication = message || block && block.call
     formatted_communication = clean(formatter.call([severity], Time.now, progname, communication))
 
-    MUTEX.synchronize do
-      Syslog.open(progname, @options, @facility) do |s|
-        s.mask = mask
-        if self.max_octets
-          buffer = "#{tags_text}"
-          formatted_communication.bytes do |byte|
-            buffer.concat(byte)
-            # if the last byte we added is potentially part of an escape, we'll go ahead and add another byte
-            if buffer.bytesize >= self.max_octets && !['%'.ord,'\\'.ord].include?(byte)
-              s.log(MAPPING[severity],buffer)
-              buffer = ""
-            end
-          end
-          s.log(MAPPING[severity],buffer) unless buffer.empty?
-        else
-          s.log(MAPPING[severity],"#{tags_text}#{formatted_communication}")
-        end
-      end
-    end
+    # Call Syslog
+    syslog_add(progname, severity, mask, formatted_communication)
   end
 
   # Set the max octets of the messages written to the log
@@ -128,13 +111,7 @@ class Syslogger
   # Sets the minimum level for messages to be written in the log.
   # +level+:: one of <tt>Logger::DEBUG</tt>, <tt>Logger::INFO</tt>, <tt>Logger::WARN</tt>, <tt>Logger::ERROR</tt>, <tt>Logger::FATAL</tt>, <tt>Logger::UNKNOWN</tt>
   def level=(level)
-    level = Logger.const_get(level.to_s.upcase) if level.is_a?(Symbol)
-
-    unless level.is_a?(Integer)
-      raise ArgumentError.new("Invalid logger level `#{level.inspect}`")
-    end
-
-    @level = level
+    @level = sanitize_level(level)
   end
 
   # Sets the ident string passed along to Syslog
@@ -151,7 +128,7 @@ class Syslogger
   end
 
   def push_tags(*tags)
-    tags.flatten.reject{ |i| i.respond_to?(:empty?) ? i.empty? : !i }.tap do |new_tags|
+    tags.flatten.reject { |i| i.respond_to?(:empty?) ? i.empty? : !i }.tap do |new_tags|
       current_tags.concat new_tags
     end
   end
@@ -170,6 +147,20 @@ class Syslogger
 
   protected
 
+  def sanitize_level(new_level)
+    begin
+      new_level = Logger.const_get(new_level.to_s.upcase)
+    rescue => _
+      raise ArgumentError.new("Invalid logger level `#{new_level.inspect}`")
+    end if new_level.is_a?(Symbol)
+
+    unless new_level.is_a?(Integer)
+      raise ArgumentError.new("Invalid logger level `#{new_level.inspect}`")
+    end
+
+    new_level
+  end
+
   # Borrowed from SyslogLogger.
   def clean(message)
     message = message.to_s.dup
@@ -185,7 +176,29 @@ class Syslogger
   def tags_text
     tags = current_tags
     if tags.any?
-      clean(tags.collect { |tag| "[#{tag}] " }.join) << " "
+      clean(tags.collect { |tag| "[#{tag}] " }.join) << ' '
+    end
+  end
+
+  def syslog_add(progname, severity, mask, formatted_communication)
+    MUTEX.synchronize do
+      Syslog.open(progname, @options, @facility) do |s|
+        s.mask = mask
+        if self.max_octets
+          buffer = "#{tags_text}"
+          formatted_communication.bytes do |byte|
+            buffer.concat(byte)
+            # if the last byte we added is potentially part of an escape, we'll go ahead and add another byte
+            if buffer.bytesize >= self.max_octets && !['%'.ord,'\\'.ord].include?(byte)
+              s.log(MAPPING[severity], buffer)
+              buffer = ''
+            end
+          end
+          s.log(MAPPING[severity], buffer) unless buffer.empty?
+        else
+          s.log(MAPPING[severity], "#{tags_text}#{formatted_communication}")
+        end
+      end
     end
   end
 end
