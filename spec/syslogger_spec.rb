@@ -394,7 +394,7 @@ describe Syslogger do
     end
   end
 
-  describe '#push_tags!' do
+  describe '#push_tags' do
     before(:each) do
       @logger = Syslogger.new('my_app', Syslog::LOG_PID, Syslog::LOG_USER)
       @logger.push_tags('tag1')
@@ -413,7 +413,7 @@ describe Syslogger do
     end
   end
 
-  describe '#clear_tags' do
+  describe '#clear_tags!' do
     before(:each) do
       @logger = Syslogger.new('my_app', Syslog::LOG_PID, Syslog::LOG_USER)
     end
