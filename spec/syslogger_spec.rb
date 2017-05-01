@@ -153,19 +153,23 @@ describe Syslogger do
     before do
       @logger = Syslogger.new("my_app", Syslog::LOG_PID, Syslog::LOG_USER)
     end
+
     it "should respond to add" do
       expect(@logger).to respond_to(:add)
     end
+
     it "should correctly log" do
       expect(Syslog).to receive(:open).with("my_app", Syslog::LOG_PID, Syslog::LOG_USER).and_yield(syslog=double("syslog", :mask= => true))
       expect(syslog).to receive(:log).with(Syslog::LOG_INFO, "message")
       @logger.add(Logger::INFO, "message")
     end
+
     it "should take the message from the block if :message is nil" do
       expect(Syslog).to receive(:open).with("my_app", Syslog::LOG_PID, Syslog::LOG_USER).and_yield(syslog=double("syslog", :mask= => true))
       expect(syslog).to receive(:log).with(Syslog::LOG_INFO, "my message")
       @logger.add(Logger::INFO) { "my message" }
     end
+
     it "should use the given progname" do
       expect(Syslog).to receive(:open).with("progname", Syslog::LOG_PID, Syslog::LOG_USER).and_yield(syslog=double("syslog", :mask= => true))
       expect(syslog).to receive(:log).with(Syslog::LOG_INFO, "message")
@@ -390,8 +394,8 @@ describe Syslogger do
     end
   end
 
-  describe '#push_tags' do
-    before do
+  describe '#push_tags!' do
+    before(:each) do
       @logger = Syslogger.new('my_app', Syslog::LOG_PID, Syslog::LOG_USER)
       @logger.push_tags('tag1')
       @logger.push_tags('tag2')
@@ -399,6 +403,18 @@ describe Syslogger do
 
     it 'saves tags' do
       expect(@logger.current_tags).to eq ['tag1', 'tag2']
+    end
+  end
+
+  describe '#clear_tags' do
+    before(:each) do
+      @logger = Syslogger.new('my_app', Syslog::LOG_PID, Syslog::LOG_USER)
+    end
+
+    it 'clears tags' do
+      expect(@logger.current_tags).to eq ['tag1', 'tag2']
+      @logger.clear_tags!
+      expect(@logger.current_tags).to eq []
     end
   end
 end
