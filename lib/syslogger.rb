@@ -1,7 +1,9 @@
+require 'forwardable'
 require 'syslog'
 require 'logger'
 
 class Syslogger
+  extend Forwardable
 
   MUTEX = Mutex.new
 
@@ -53,9 +55,7 @@ class Syslogger
     @options   = options || (Syslog::LOG_PID | Syslog::LOG_CONS)
     @facility  = facility
     @level     = Logger::INFO
-    @formatter = proc do |_, _, _, msg|
-      msg
-    end
+    @formatter = SimpleFormatter.new
   end
 
   LEVELS.each do |logger_method|
@@ -116,29 +116,10 @@ class Syslogger
 
   # Tagging code borrowed from ActiveSupport gem
   def tagged(*tags)
-    new_tags = push_tags(*tags)
-    yield self
-  ensure
-    pop_tags(new_tags.size)
+    formatter.tagged(*tags) { yield self }
   end
 
-  def push_tags(*tags)
-    tags.flatten.reject { |i| i.respond_to?(:empty?) ? i.empty? : !i }.tap do |new_tags|
-      current_tags.concat(new_tags).uniq!
-    end
-  end
-
-  def pop_tags(size = 1)
-    current_tags.pop size
-  end
-
-  def clear_tags!
-    current_tags.clear
-  end
-
-  def current_tags
-    Thread.current[:syslogger_tagged_logging_tags] ||= []
-  end
+  def_delegators :formatter, :current_tags, :push_tags, :pop_tags, :clear_tags!
 
   protected
 
@@ -168,19 +149,12 @@ class Syslogger
 
   private
 
-  def tags_text
-    tags = current_tags
-    if tags.any?
-      clean(tags.collect { |tag| "[#{tag}] " }.join) << ' '
-    end
-  end
-
   def syslog_add(progname, severity, mask, formatted_communication)
     MUTEX.synchronize do
       Syslog.open(progname, @options, @facility) do |s|
         s.mask = mask
         if max_octets
-          buffer = "#{tags_text}"
+          buffer = ''
           formatted_communication.bytes do |byte|
             buffer.concat(byte)
             # if the last byte we added is potentially part of an escape, we'll go ahead and add another byte
@@ -191,9 +165,56 @@ class Syslogger
           end
           s.log(MAPPING[severity], buffer) unless buffer.empty?
         else
-          s.log(MAPPING[severity], "#{tags_text}#{formatted_communication}")
+          s.log(MAPPING[severity], formatted_communication)
         end
       end
     end
+  end
+
+  # Borrowed from ActiveSupport.
+  # See: https://github.com/rails/rails/blob/master/activesupport/lib/active_support/tagged_logging.rb
+  class SimpleFormatter < Logger::Formatter
+
+    # This method is invoked when a log event occurs.
+    def call(severity, timestamp, progname, msg)
+      "#{tags_text}#{msg}"
+    end
+
+    def tagged(*tags)
+      new_tags = push_tags(*tags)
+      yield self
+    ensure
+      pop_tags(new_tags.size)
+    end
+
+    def push_tags(*tags)
+      tags.flatten.reject { |i| i.respond_to?(:empty?) ? i.empty? : !i }.tap do |new_tags|
+        current_tags.concat(new_tags).uniq!
+      end
+    end
+
+    def pop_tags(size = 1)
+      current_tags.pop size
+    end
+
+    def clear_tags!
+      current_tags.clear
+    end
+
+    # Fix: https://github.com/crohr/syslogger/issues/29
+    # See: https://github.com/rails/rails/blob/master/activesupport/lib/active_support/tagged_logging.rb#L47
+    def current_tags
+      # We use our object ID here to avoid conflicting with other instances
+      thread_key = @thread_key ||= "syslogger_tagged_logging_tags:#{object_id}".freeze
+      Thread.current[thread_key] ||= []
+    end
+
+    def tags_text
+      tags = current_tags
+      if tags.any?
+        tags.collect { |tag| "[#{tag}] " }.join
+      end
+    end
+
   end
 end

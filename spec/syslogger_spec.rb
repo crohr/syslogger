@@ -64,15 +64,19 @@ describe Syslogger do
     end
 
     it 'should clean formatted message' do
+      formatter = Class.new(Syslogger::SimpleFormatter) do
+        def call(severity, timestamp, progname, msg)
+          msg.split(//).join('%')
+        end
+      end
+
       allow(Syslog).to receive(:open).and_yield(fake_syslog)
       expect(fake_syslog).to receive(:log).with(Syslog::LOG_INFO, "m%%e%%s%%s%%a%%g%%e")
 
       original_formatter = logger.formatter
 
       begin
-        logger.formatter = proc do |severity, datetime, progname, msg|
-          msg.split(//).join('%')
-        end
+        logger.formatter = formatter.new
         logger.add(Logger::INFO, 'message')
       ensure
         logger.formatter = original_formatter
@@ -118,11 +122,14 @@ describe Syslogger do
     end
 
     it 'should apply the log formatter to the message' do
+      formatter = Class.new(Syslogger::SimpleFormatter) do
+        def call(severity, timestamp, progname, msg)
+          "test #{msg}!"
+        end
+      end
       allow(Syslog).to receive(:open).and_yield(fake_syslog)
       expect(fake_syslog).to receive(:log).with(Syslog::LOG_INFO, 'test message!')
-      logger.formatter = proc do |severity, datetime, progname, msg|
-        "test #{msg}!"
-      end
+      logger.formatter = formatter.new
       logger.add(Logger::INFO, 'message')
     end
   end
@@ -292,6 +299,19 @@ describe Syslogger do
           expect(logger.send("#{logger_method}?")).to be false
         end
       end
+    end
+  end
+
+  # Fix https://github.com/crohr/syslogger/issues/29
+  describe '#formatter' do
+    let(:logger) { Syslogger.new('my_app', Syslog::LOG_PID, Syslog::LOG_USER) }
+
+    it 'should not raise error' do
+      ActiveJob::Base.logger = logger
+      expect(logger).to receive(:info).at_least(1).times.with(nil)
+      expect {
+        HelloJob.perform_later "Cristian"
+      }.to_not raise_error
     end
   end
 
