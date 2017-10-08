@@ -417,13 +417,13 @@ describe Syslogger do
 
       thread1 = Thread.new do
         5000.times do |i|
-          logger1.write 'logger1'
+          logger1.info 'logger1'
         end
       end
 
       thread2 = Thread.new do
         5000.times do |i|
-          logger2.write 'logger2'
+          logger2.info 'logger2'
         end
       end
 
