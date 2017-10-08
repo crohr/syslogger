@@ -95,7 +95,7 @@ class Syslogger
     progname ||= @ident
     mask = Syslog::LOG_UPTO(MAPPING[@level])
     communication = message || block && block.call
-    formatted_communication = clean(formatter.call([severity], Time.now, progname, communication))
+    formatted_communication = clean(formatter.call(severity, Time.now, progname, communication))
 
     # Call Syslog
     syslog_add(progname, severity, mask, formatted_communication)
