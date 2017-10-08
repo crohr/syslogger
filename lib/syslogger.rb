@@ -7,7 +7,7 @@ class Syslogger
 
   MUTEX = Mutex.new
 
-  attr_reader   :level, :options, :facility
+  attr_reader   :default_level, :options, :facility
   attr_accessor :ident, :formatter, :max_octets
 
   MAPPING = {
@@ -51,11 +51,11 @@ class Syslogger
   #   logger.info "my_subapp" { "Some lazily computed message" }
   #
   def initialize(ident = $PROGRAM_NAME, options = Syslog::LOG_PID | Syslog::LOG_CONS, facility = nil)
-    @ident     = ident
-    @options   = options || (Syslog::LOG_PID | Syslog::LOG_CONS)
-    @facility  = facility
-    @level     = Logger::INFO
-    @formatter = SimpleFormatter.new
+    @ident         = ident
+    @options       = options || (Syslog::LOG_PID | Syslog::LOG_CONS)
+    @facility      = facility
+    @default_level = Logger::INFO
+    @formatter     = SimpleFormatter.new
   end
 
   LEVELS.each do |logger_method|
@@ -104,7 +104,15 @@ class Syslogger
   # Sets the minimum level for messages to be written in the log.
   # +level+:: one of <tt>Logger::DEBUG</tt>, <tt>Logger::INFO</tt>, <tt>Logger::WARN</tt>, <tt>Logger::ERROR</tt>, <tt>Logger::FATAL</tt>, <tt>Logger::UNKNOWN</tt>
   def level=(level)
-    @level = sanitize_level(level)
+    Thread.current[:syslogger_level] = sanitize_level(level)
+  end
+
+  def level
+    Thread.current[:syslogger_level] || default_level
+  end
+
+  def default_level=(level)
+    @default_level = sanitize_level(level)
   end
 
   # Tagging code borrowed from ActiveSupport gem

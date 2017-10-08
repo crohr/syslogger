@@ -2,6 +2,11 @@ require 'spec_helper'
 
 describe Syslogger do
 
+  # Loglevel is now stored in current thread.
+  # We neeed to reset it to 1 (Loglevel::INFO) after each test to not
+  # break tests that depends on loglevel.
+  after(:each) { Thread.current[:syslogger_level] = 1 }
+
   let(:fake_syslog) { double('syslog', :mask= => true) }
 
   describe '.new' do
@@ -446,6 +451,36 @@ describe Syslogger do
       threads << Thread.new do
         5000.times do |i|
           logger2.info 'logger2'
+        end
+      end
+
+      threads.map(&:join)
+    end
+
+    it 'should allow one instance with different loglevel in threads' do
+      logger = Syslogger.new('my_app1', Syslog::LOG_PID, Syslog::LOG_USER)
+      syslog = double('syslog', :mask= => true)
+
+      expect(Syslog).to receive(:open).exactly(5000).times.with('my_app1', Syslog::LOG_PID, Syslog::LOG_USER).and_yield(syslog)
+
+      expect(syslog).to receive(:log).exactly(5000).times.with(Syslog::LOG_WARNING, 'logger1')
+      expect(syslog).to_not receive(:log).with(Syslog::LOG_INFO, 'logger2')
+
+      threads = []
+
+      threads << Thread.new do
+        logger.level = Logger::INFO
+
+        5000.times do |i|
+          logger.warn 'logger1'
+        end
+      end
+
+      threads << Thread.new do
+        logger.level = Logger::FATAL
+
+        5000.times do |i|
+          logger.info 'logger2'
         end
       end
 
