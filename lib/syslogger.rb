@@ -43,10 +43,10 @@ class Syslogger
   #   logger.info "my_subapp" { "Some lazily computed message" }
   #
   def initialize(ident = $0, options = Syslog::LOG_PID | Syslog::LOG_CONS, facility = nil)
-    @ident = ident
-    @options = options || (Syslog::LOG_PID | Syslog::LOG_CONS)
-    @facility = facility
-    @level = Logger::INFO
+    @ident     = ident
+    @options   = options || (Syslog::LOG_PID | Syslog::LOG_CONS)
+    @facility  = facility
+    @level     = Logger::INFO
     @formatter = proc do |_, _, _, msg|
       msg
     end
