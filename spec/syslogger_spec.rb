@@ -415,20 +415,21 @@ describe Syslogger do
       expect(syslog1).to receive(:log).exactly(5000).times.with(Syslog::LOG_INFO, 'logger1')
       expect(syslog2).to receive(:log).exactly(5000).times.with(Syslog::LOG_INFO, 'logger2')
 
-      thread1 = Thread.new do
+      threads = []
+
+      threads << Thread.new do
         5000.times do |i|
           logger1.info 'logger1'
         end
       end
 
-      thread2 = Thread.new do
+      threads << Thread.new do
         5000.times do |i|
           logger2.info 'logger2'
         end
       end
 
-      thread1.join
-      thread2.join
+      threads.map(&:join)
     end
   end
 
