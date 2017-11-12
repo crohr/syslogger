@@ -34,10 +34,6 @@ logger.info "will appear"
 logger.warn "will appear"
 ```
 
-## Changelog
-
-See <https://github.com/crohr/syslogger/commits/master>.
-
 ## Contributions
 
 See <https://github.com/crohr/syslogger/contributors>.
