@@ -399,7 +399,7 @@ describe Syslogger do
         end
       end
 
-      threads.each { |thread| thread.join }
+      threads.map(&:join)
     end
 
     it 'should allow multiple instances to log at the same time' do
