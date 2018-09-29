@@ -75,19 +75,12 @@ class Syslogger
     end
   end
 
-  # Log a message at the Logger::INFO level. Useful for use with Rack::CommonLogger
+  # Log a message at the Logger::INFO level.
   def write(msg)
     add(Logger::INFO, msg)
   end
-
-  # Logs a message at the Logger::INFO level.
-  def <<(msg)
-    add(Logger::INFO, msg)
-  end
-
-  def puts(msg)
-    add(Logger::INFO, msg)
-  end
+  alias <<   write
+  alias puts write
 
   # Low level method to add a message.
   # +severity+::  the level of the message. One of Logger::DEBUG, Logger::INFO, Logger::WARN, Logger::ERROR, Logger::FATAL, Logger::UNKNOWN
