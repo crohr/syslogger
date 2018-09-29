@@ -1,5 +1,6 @@
 AllCops:
   Exclude:
+    - gemfiles/*
     - spec/**/*
 
 Metrics/LineLength:

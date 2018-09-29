@@ -167,9 +167,8 @@ class Syslogger
   # Borrowed from ActiveSupport.
   # See: https://github.com/rails/rails/blob/master/activesupport/lib/active_support/tagged_logging.rb
   class SimpleFormatter < Logger::Formatter
-
     # This method is invoked when a log event occurs.
-    def call(severity, timestamp, progname, msg)
+    def call(_severity, _timestamp, _progname, msg)
       "#{tags_text}#{msg}"
     end
 
@@ -204,10 +203,7 @@ class Syslogger
 
     def tags_text
       tags = current_tags
-      if tags.any?
-        tags.collect { |tag| "[#{tag}] " }.join
-      end
+      tags.collect { |tag| "[#{tag}] " }.join if tags.any?
     end
-
   end
 end

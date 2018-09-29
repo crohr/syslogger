@@ -14,12 +14,12 @@ Gem::Specification.new do |s|
   s.description = 'Same as SyslogLogger, but without the ridiculous number of dependencies and with the possibility to specify the syslog facility'
   s.license     = 'MIT'
 
+  s.add_development_dependency 'activejob'
+  s.add_development_dependency 'appraisal'
   s.add_development_dependency 'rake'
   s.add_development_dependency 'rdoc'
   s.add_development_dependency 'rspec'
   s.add_development_dependency 'simplecov'
-  s.add_development_dependency 'appraisal'
-  s.add_development_dependency 'activejob'
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
