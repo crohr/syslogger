@@ -1,5 +1,6 @@
-# -*- encoding: utf-8 -*-
-$:.push File.expand_path('../lib', __FILE__)
+# frozen_string_literal: true
+
+$LOAD_PATH.push File.expand_path('lib', __dir__)
 require 'syslogger/version'
 
 Gem::Specification.new do |s|
@@ -14,13 +15,13 @@ Gem::Specification.new do |s|
   s.license     = 'MIT'
 
   s.add_development_dependency 'rake'
-  s.add_development_dependency 'rspec'
   s.add_development_dependency 'rdoc'
+  s.add_development_dependency 'rspec'
   s.add_development_dependency 'simplecov'
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
-  s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
+  s.executables   = `git ls-files -- bin/*`.split("\n").map { |f| File.basename(f) }
   s.require_paths = ['lib']
 
   s.rdoc_options = ['--charset=UTF-8']
