@@ -1,26 +1,17 @@
-## MAC OS
-.DS_Store
+# Ignore bundler config.
+/.bundle
 
-## TEXTMATE
-*.tmproj
-tmtags
+# Ignore Gemfile.lock
+/Gemfile.lock
+/gemfiles/*.lock
+/gemfiles/.bundle
 
-## EMACS
-*~
-\#*
-.\#*
+# Ignore test files
+/coverage
+/tmp
 
-## VIM
-*.swp
+# RVM files
+/.ruby-version
 
-## PROJECT::GENERAL
-coverage
-rdoc
-pkg
-Gemfile.lock
-
-## PROJECT::SPECIFIC
-
-## RVM
-.rvmrc
-
+# Gem files
+/*.gem
