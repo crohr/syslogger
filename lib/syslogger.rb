@@ -1,13 +1,12 @@
 require 'syslog'
 require 'logger'
-require 'thread'
 
 class Syslogger
 
   MUTEX = Mutex.new
 
-  attr_reader :level, :ident, :options, :facility, :max_octets
-  attr_accessor :formatter
+  attr_reader   :level, :options, :facility
+  attr_accessor :ident, :formatter, :max_octets
 
   MAPPING = {
     Logger::DEBUG   => Syslog::LOG_DEBUG,
@@ -18,16 +17,23 @@ class Syslogger
     Logger::UNKNOWN => Syslog::LOG_ALERT
   }.freeze
 
-  #
+  LEVELS = %w[debug info warn error fatal unknown].freeze
+
   # Initializes default options for the logger
+  #
   # <tt>ident</tt>:: the name of your program [default=$0].
+  #
   # <tt>options</tt>::  syslog options [default=<tt>Syslog::LOG_PID | Syslog::LOG_CONS</tt>].
+  #
   #                     Correct values are:
   #                       LOG_CONS    : writes the message on the console if an error occurs when sending the message;
   #                       LOG_NDELAY  : no delay before sending the message;
   #                       LOG_PERROR  : messages will also be written on STDERR;
   #                       LOG_PID     : adds the process number to the message (just after the program name)
-  # <tt>facility</tt>:: the syslog facility [default=nil] Correct values include:
+  #
+  # <tt>facility</tt>:: the syslog facility [default=nil]
+  #
+  #                     Correct values include:
   #                       Syslog::LOG_DAEMON
   #                       Syslog::LOG_USER
   #                       Syslog::LOG_SYSLOG
@@ -42,7 +48,7 @@ class Syslogger
   #   logger.debug "debug message"
   #   logger.info "my_subapp" { "Some lazily computed message" }
   #
-  def initialize(ident = $0, options = Syslog::LOG_PID | Syslog::LOG_CONS, facility = nil)
+  def initialize(ident = $PROGRAM_NAME, options = Syslog::LOG_PID | Syslog::LOG_CONS, facility = nil)
     @ident     = ident
     @options   = options || (Syslog::LOG_PID | Syslog::LOG_CONS)
     @facility  = facility
@@ -52,19 +58,20 @@ class Syslogger
     end
   end
 
-  %w{debug info warn error fatal unknown}.each do |logger_method|
+  LEVELS.each do |logger_method|
     # Accepting *args as message could be nil.
     #  Default params not supported in ruby 1.8.7
     define_method logger_method.to_sym do |*args, &block|
       severity = Logger.const_get(logger_method.upcase)
       return true if @level > severity
+
       add(severity, nil, args.first, &block)
     end
 
-    unless logger_method == 'unknown'
-      define_method "#{logger_method}?".to_sym do
-        @level <= Logger.const_get(logger_method.upcase)
-      end
+    next if logger_method == 'unknown'.freeze
+
+    define_method "#{logger_method}?".to_sym do
+      @level <= Logger.const_get(logger_method.upcase)
     end
   end
 
@@ -101,20 +108,10 @@ class Syslogger
     syslog_add(progname, severity, mask, formatted_communication)
   end
 
-  # Set the max octets of the messages written to the log
-  def max_octets=(max_octets)
-    @max_octets = max_octets
-  end
-
   # Sets the minimum level for messages to be written in the log.
   # +level+:: one of <tt>Logger::DEBUG</tt>, <tt>Logger::INFO</tt>, <tt>Logger::WARN</tt>, <tt>Logger::ERROR</tt>, <tt>Logger::FATAL</tt>, <tt>Logger::UNKNOWN</tt>
   def level=(level)
     @level = sanitize_level(level)
-  end
-
-  # Sets the ident string passed along to Syslog
-  def ident=(ident)
-    @ident = ident
   end
 
   # Tagging code borrowed from ActiveSupport gem
@@ -163,9 +160,9 @@ class Syslogger
   def clean(message)
     message = message.to_s.dup
     message.strip! # remove whitespace
-    message.gsub!(/\n/, '\\n') # escape newlines
-    message.gsub!(/%/, '%%') # syslog(3) freaks on % (printf)
-    message.gsub!(/\e\[[^m]*m/, '') # remove useless ansi color codes
+    message.gsub!(/\n/, '\\n'.freeze) # escape newlines
+    message.gsub!(/%/, '%%'.freeze) # syslog(3) freaks on % (printf)
+    message.gsub!(/\e\[[^m]*m/, ''.freeze) # remove useless ansi color codes
     message
   end
 
@@ -182,12 +179,12 @@ class Syslogger
     MUTEX.synchronize do
       Syslog.open(progname, @options, @facility) do |s|
         s.mask = mask
-        if self.max_octets
+        if max_octets
           buffer = "#{tags_text}"
           formatted_communication.bytes do |byte|
             buffer.concat(byte)
             # if the last byte we added is potentially part of an escape, we'll go ahead and add another byte
-            if buffer.bytesize >= self.max_octets && !['%'.ord,'\\'.ord].include?(byte)
+            if buffer.bytesize >= max_octets && !['%'.ord, '\\'.ord].include?(byte)
               s.log(MAPPING[severity], buffer)
               buffer = ''
             end
