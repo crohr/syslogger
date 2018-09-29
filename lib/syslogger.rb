@@ -63,7 +63,7 @@ class Syslogger
     #  Default params not supported in ruby 1.8.7
     define_method logger_method.to_sym do |*args, &block|
       severity = Logger.const_get(logger_method.upcase)
-      return true if @level > severity
+      return true if level > severity
 
       add(severity, nil, args.first, &block)
     end
@@ -71,7 +71,7 @@ class Syslogger
     next if logger_method == 'unknown'.freeze
 
     define_method "#{logger_method}?".to_sym do
-      @level <= Logger.const_get(logger_method.upcase)
+      level <= Logger.const_get(logger_method.upcase)
     end
   end
 
@@ -93,7 +93,7 @@ class Syslogger
       message, progname = progname, nil
     end
     progname ||= @ident
-    mask = Syslog::LOG_UPTO(MAPPING[@level])
+    mask = Syslog::LOG_UPTO(MAPPING[level])
     communication = message || block && block.call
     formatted_communication = clean(formatter.call(severity, Time.now, progname, communication))
 
