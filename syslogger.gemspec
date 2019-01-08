@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
-lib = File.expand_path('lib', __dir__)
-$LOAD_PATH.push(lib) unless $LOAD_PATH.include?(lib)
-require 'syslogger/version'
+require_relative 'lib/syslogger/version'
 
 Gem::Specification.new do |s|
   s.name        = 'syslogger'
@@ -15,17 +13,12 @@ Gem::Specification.new do |s|
   s.description = 'Same as SyslogLogger, but without the ridiculous number of dependencies and with the possibility to specify the syslog facility'
   s.license     = 'MIT'
 
+  s.files = `git ls-files`.split("\n")
+
   s.add_development_dependency 'activejob'
   s.add_development_dependency 'appraisal'
   s.add_development_dependency 'rake'
   s.add_development_dependency 'rdoc'
   s.add_development_dependency 'rspec'
   s.add_development_dependency 'simplecov'
-
-  s.files         = `git ls-files`.split("\n")
-  s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
-  s.executables   = `git ls-files -- bin/*`.split("\n").map { |f| File.basename(f) }
-  s.require_paths = ['lib']
-
-  s.rdoc_options = ['--charset=UTF-8']
 end
