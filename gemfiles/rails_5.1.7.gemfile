@@ -2,6 +2,6 @@
 
 source "https://rubygems.org"
 
-gem "activejob", "4.2.10"
+gem "activejob", "5.1.7"
 
 gemspec path: "../"
