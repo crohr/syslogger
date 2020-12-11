@@ -4,7 +4,7 @@
 [![GitHub release](https://img.shields.io/github/release/crohr/syslogger.svg)](https://github.com/crohr/syslogger/releases/latest)
 [![Gem](https://img.shields.io/gem/v/syslogger.svg)](https://rubygems.org/gems/syslogger)
 [![Gem](https://img.shields.io/gem/dtv/syslogger.svg)](https://rubygems.org/gems/syslogger)
-[![Build Status](https://travis-ci.org/crohr/syslogger.svg?branch=master)](https://travis-ci.org/crohr/syslogger)
+[![CI](https://github.com/crohr/syslogger/workflows/CI/badge.svg)](https://github.com/crohr/syslogger/actions)
 
 A drop-in replacement for the standard Logger Ruby library, that logs to the syslog instead of a log file.
 Contrary to the SyslogLogger library, you can specify the facility and the syslog options.
