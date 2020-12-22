@@ -4,7 +4,7 @@ require_relative 'lib/syslogger/version'
 
 Gem::Specification.new do |s|
   s.name        = 'syslogger'
-  s.version     = Syslogger::VERSION
+  s.version     = Syslogger::VERSION::STRING
   s.platform    = Gem::Platform::RUBY
   s.authors     = ['Cyril Rohr']
   s.email       = ['cyril.rohr@gmail.com']
