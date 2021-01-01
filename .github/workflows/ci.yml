@@ -41,7 +41,7 @@ jobs:
           RAILS_VERSION: ${{ matrix.rails }}
         run: |
           export BUNDLE_GEMFILE="${GITHUB_WORKSPACE}/gemfiles/${RAILS_VERSION}.gemfile"
-          gem install bundler -v 2.1.4
+          gem install bundler
           bundle config path "${GITHUB_WORKSPACE}/vendor/bundle"
           bundle install --jobs 4 --retry 3
 
