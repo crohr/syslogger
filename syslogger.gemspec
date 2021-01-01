@@ -12,6 +12,12 @@ Gem::Specification.new do |s|
   s.summary     = 'Dead simple Ruby Syslog logger'
   s.description = 'Same as SyslogLogger, but without the ridiculous number of dependencies and with the possibility to specify the syslog facility'
   s.license     = 'MIT'
+  s.metadata    = {
+    'homepage_uri'    => 'https://github.com/crohr/syslogger',
+    'changelog_uri'   => 'https://github.com/crohr/syslogger/blob/master/CHANGELOG.md',
+    'source_code_uri' => 'https://github.com/crohr/syslogger',
+    'bug_tracker_uri' => 'https://github.com/crohr/syslogger/issues'
+  }
 
   s.files = `git ls-files`.split("\n")
 
