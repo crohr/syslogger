@@ -177,7 +177,7 @@ class Syslogger
   def sanitize_level(new_level) # :nodoc:
     begin
       new_level = Logger.const_get(new_level.to_s.upcase)
-    rescue => _
+    rescue => _e
       raise ArgumentError.new("Invalid logger level `#{new_level.inspect}`")
     end if new_level.is_a?(Symbol)
 
@@ -200,6 +200,7 @@ class Syslogger
 
   private
 
+  # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
   def syslog_add(progname, severity, mask, formatted_communication)
     MUTEX.synchronize do
       Syslog.open(progname, @options, @facility) do |s|
@@ -221,6 +222,7 @@ class Syslogger
       end
     end
   end
+  # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
 
   # Borrowed from ActiveSupport.
   # See: https://github.com/rails/rails/blob/master/activesupport/lib/active_support/tagged_logging.rb
