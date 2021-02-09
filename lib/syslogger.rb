@@ -2,15 +2,19 @@ require 'forwardable'
 require 'syslog'
 require 'logger'
 
+# Syslogger is a drop-in replacement for the standard Logger Ruby library, that logs to the syslog instead of a log file.
+#
+# Contrary to the SyslogLogger library, you can specify the facility and the syslog options.
+#
 class Syslogger
   extend Forwardable
 
-  MUTEX = Mutex.new
+  MUTEX = Mutex.new # :nodoc:
 
   attr_reader   :level, :options, :facility
   attr_accessor :ident, :formatter, :max_octets
 
-  MAPPING = {
+  MAPPING = { # :nodoc:
     Logger::DEBUG   => Syslog::LOG_DEBUG,
     Logger::INFO    => Syslog::LOG_INFO,
     Logger::WARN    => Syslog::LOG_WARNING,
@@ -19,11 +23,11 @@ class Syslogger
     Logger::UNKNOWN => Syslog::LOG_ALERT
   }.freeze
 
-  LEVELS = %w[debug info warn error fatal unknown].freeze
+  LEVELS = %w[debug info warn error fatal unknown].freeze # :nodoc:
 
   # Initializes default options for the logger
   #
-  # <tt>ident</tt>:: the name of your program [default=$0].
+  # <tt>ident</tt>:: the name of your program [default=<tt>$0</tt>].
   #
   # <tt>options</tt>::  syslog options [default=<tt>Syslog::LOG_PID | Syslog::LOG_CONS</tt>].
   #
@@ -33,7 +37,7 @@ class Syslogger
   #                       LOG_PERROR  : messages will also be written on STDERR;
   #                       LOG_PID     : adds the process number to the message (just after the program name)
   #
-  # <tt>facility</tt>:: the syslog facility [default=nil]
+  # <tt>facility</tt>:: the syslog facility [default=<tt>nil</tt>]
   #
   #                     Correct values include:
   #                       Syslog::LOG_DAEMON
@@ -57,6 +61,60 @@ class Syslogger
     @level     = Logger::INFO
     @formatter = SimpleFormatter.new
   end
+
+  ##
+  # :method: debug
+  #
+  # :call-seq:
+  #   debug(message)
+  #
+  # Log message
+  # +message+:: the message string.
+
+  ##
+  # :method: info
+  #
+  # :call-seq:
+  #   info(message)
+  #
+  # Log message
+  # +message+:: the message string.
+
+  ##
+  # :method: warn
+  #
+  # :call-seq:
+  #   warn(message)
+  #
+  # Log message
+  # +message+:: the message string.
+
+  ##
+  # :method: error
+  #
+  # :call-seq:
+  #   error(message)
+  #
+  # Log message
+  # +message+:: the message string.
+
+  ##
+  # :method: fatal
+  #
+  # :call-seq:
+  #   fatal(message)
+  #
+  # Log message
+  # +message+:: the message string.
+
+  ##
+  # :method: unknown
+  #
+  # :call-seq:
+  #   unknown(message)
+  #
+  # Makes grease fly.
+  # +message+:: the message string.
 
   LEVELS.each do |logger_method|
     # Accepting *args as message could be nil.
@@ -116,7 +174,7 @@ class Syslogger
 
   protected
 
-  def sanitize_level(new_level)
+  def sanitize_level(new_level) # :nodoc:
     begin
       new_level = Logger.const_get(new_level.to_s.upcase)
     rescue => _
@@ -131,7 +189,7 @@ class Syslogger
   end
 
   # Borrowed from SyslogLogger.
-  def clean(message)
+  def clean(message) # :nodoc:
     message = message.to_s.dup
     message.strip! # remove whitespace
     message.gsub!(/\n/, '\\n'.freeze) # escape newlines
@@ -166,7 +224,7 @@ class Syslogger
 
   # Borrowed from ActiveSupport.
   # See: https://github.com/rails/rails/blob/master/activesupport/lib/active_support/tagged_logging.rb
-  class SimpleFormatter < Logger::Formatter
+  class SimpleFormatter < Logger::Formatter # :nodoc:
     # This method is invoked when a log event occurs.
     def call(_severity, _timestamp, _progname, msg)
       "#{tags_text}#{msg}"

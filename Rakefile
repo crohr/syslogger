@@ -10,7 +10,7 @@ task default: :spec
 Rake::RDocTask.new do |rdoc|
   require 'syslogger'
   rdoc.rdoc_dir = 'rdoc'
-  rdoc.title = "syslogger #{Syslogger::VERSION}"
+  rdoc.title = "syslogger #{Syslogger::VERSION::STRING}"
   rdoc.rdoc_files.include('README*')
   rdoc.rdoc_files.include('lib/**/*.rb')
 end
