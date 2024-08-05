@@ -21,6 +21,7 @@ Gem::Specification.new do |s|
 
   s.files = `git ls-files`.split("\n")
 
+  s.add_dependency 'syslog'
   s.add_development_dependency 'activejob'
   s.add_development_dependency 'appraisal'
   s.add_development_dependency 'guard-rspec'
